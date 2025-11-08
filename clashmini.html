@@ -600,6 +600,26 @@
             font-weight: 700;
             color: #000;
         }
+        
+        /* === NEW: Deck Button Styles === */
+        #popup-deck-button {
+            /* Base styles are applied via Tailwind classes in JS */
+        }
+        #popup-deck-button.remove {
+            background-color: #ef4444; /* Red */
+            border-bottom-color: #b91c1c;
+        }
+        #popup-deck-button.remove:hover {
+            background-color: #f87171;
+        }
+        #popup-deck-button:disabled {
+            background-color: #9ca3af;
+            border-bottom-color: #4b5563;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        /* === END: Deck Button Styles === */
+
 
         /* --- NEW: GEMINI API STYLES --- */
         #gemini-tips-button {
@@ -655,6 +675,27 @@
         /* Ensure legendary border width matches base */
         .card.rarity-legendary { border-width: 3px; }
         #next-card-preview.rarity-legendary { border-width: 2px; }
+        
+        /* --- NEW: Battle Deck Grid Styles --- */
+        #battle-deck-grid .deck-slot {
+            width: 75px;
+            height: 110px;
+            background: rgba(0,0,0,0.3);
+            border: 2px dashed #60a5fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #60a5fa;
+            margin: auto;
+        }
+        #battle-deck-grid .card {
+            /* Uses existing .card styles */
+            width: 75px;
+            height: 110px;
+            margin: 0; /* Override margin: auto */
+        }
         
 
         /* --- REMOVED: Dragged Card Visual --- */
@@ -945,6 +986,19 @@
 
         <!-- Tab 2: Cards (Hidden by default) -->
         <div id="tab-content-cards" class="tab-content hidden">
+            
+            <!-- === NEW: Battle Deck Section === -->
+            <div class="w-full max-w-md px-4">
+                <h3 class="text-xl font-bold text-center mb-2">Battle Deck</h3>
+                <div id="battle-deck-grid" class.bind="false" ="grid grid-cols-4 gap-4 bg-blue-900 p-4 rounded-lg border-2 border-blue-400">
+                    <!-- 8 slots populated by JS -->
+                </div>
+                <div id="battle-deck-stats" class="text-center text-sm mt-2 text-gray-300">
+                    <!-- Deck stats populated by JS -->
+                </div>
+            </div>
+            <!-- === END: Battle Deck Section === -->
+
             <h2 class="text-2xl font-bold mt-4">Card Collection</h2>
             <div id="card-collection-grid" class="grid grid-cols-4 gap-4">
                 <!-- Populated by JS -->
@@ -1043,6 +1097,12 @@
                     </div>
                 </div>
                 
+                <!-- === NEW: Deck Button === -->
+                <button id="popup-deck-button" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg mt-4 border-b-4 border-green-700 hover:bg-green-600 transition-all">
+                    Add to Deck
+                </button>
+                <!-- === END: Deck Button === -->
+
                 <!-- === NEW: GEMINI API SECTION === -->
                 <div class="mt-4">
                     <button id="gemini-tips-button" class="w-full">
@@ -1243,6 +1303,9 @@
         const nextCardPreview = document.getElementById('next-card-preview'); 
         const message = document.getElementById('message');
         const messageText = document.getElementById('message-text');
+        // === NEW: Battle Deck UI Elements ===
+        const battleDeckGrid = document.getElementById('battle-deck-grid');
+        const battleDeckStats = document.getElementById('battle-deck-stats');
 
         // === NEW: Global Currency State ===
         let userGold = 259928;
@@ -1496,6 +1559,9 @@
             }
         };
         const FULL_DECK_KEYS = Object.keys(CARD_DECK);
+        
+        // === NEW: Global Player Battle Deck ===
+        let playerBattleDeck = FULL_DECK_KEYS.slice(0, 8); // Default 8-card deck
 
         const TRAINER_LIST = [
             { name: "Trainer Earl", trophies: 1200 }, { name: "Trainer Fikova", trophies: 1350 },
@@ -1525,6 +1591,41 @@
             { name: "Trainer Diamond", trophies: 1300 }, { name: "Trainer Cheddar", trophies: 1150 },
             { name: "Trainer Cheddar II", trophies: 1250 }
         ];
+        
+        // --- NEW: Battle Deck UI Function ---
+        function updateBattleDeckUI() {
+            battleDeckGrid.innerHTML = '';
+            let totalElixir = 0;
+            
+            // Draw filled slots
+            playerBattleDeck.forEach(cardKey => {
+                const card = CARD_DECK[cardKey];
+                totalElixir += card.cost;
+                const cardEl = document.createElement('div');
+                cardEl.className = `card rarity-${card.rarity.toLowerCase()}`;
+                cardEl.innerHTML = `
+                    <div class="card-cost">${card.cost}</div>
+                    <div class="card-image">${CARD_SVG_GRAPHICS[cardKey] || ''}</div>
+                    <div class="card-name">${card.name}</div>
+                `;
+                // Add click listener to show stats (and allow removal)
+                cardEl.addEventListener('click', () => showCardStats(cardKey));
+                battleDeckGrid.appendChild(cardEl);
+            });
+
+            // Draw empty slots
+            const emptySlots = 8 - playerBattleDeck.length;
+            for (let i = 0; i < emptySlots; i++) {
+                const slotEl = document.createElement('div');
+                slotEl.className = 'deck-slot';
+                slotEl.innerText = 'Empty Slot';
+                battleDeckGrid.appendChild(slotEl);
+            }
+            
+            // Update stats
+            const avgElixir = (playerBattleDeck.length > 0) ? (totalElixir / playerBattleDeck.length).toFixed(1) : 0;
+            battleDeckStats.innerText = `Deck: ${playerBattleDeck.length}/8 | Avg. Elixir: ${avgElixir}`;
+        }
 
         // --- NEW: Card Stats Popup Logic ---
         const cardStatsPopup = document.getElementById('card-stats-popup');
@@ -1629,6 +1730,42 @@
             } else {
                 statBoxLifetime.classList.add('hidden');
             }
+            
+            // === NEW: Deck Button Logic ===
+            const deckButton = document.getElementById('popup-deck-button'); // Get button
+            const isInDeck = playerBattleDeck.includes(cardKey);
+            const isDeckFull = playerBattleDeck.length >= 8;
+
+            if (isInDeck) {
+                deckButton.innerText = 'Remove from Deck';
+                deckButton.className = 'w-full text-white font-bold py-2 px-4 rounded-lg mt-4 border-b-4 transition-all remove'; // Red style
+                deckButton.disabled = false;
+                
+                deckButton.onclick = () => {
+                    playerBattleDeck = playerBattleDeck.filter(key => key !== cardKey);
+                    updateBattleDeckUI();
+                    hideCardStats();
+                };
+                
+            } else if (!isInDeck && !isDeckFull) {
+                deckButton.innerText = 'Add to Deck';
+                deckButton.className = 'w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg mt-4 border-b-4 border-green-700 hover:bg-green-600 transition-all'; // Green style
+                deckButton.disabled = false;
+                
+                deckButton.onclick = () => {
+                    playerBattleDeck.push(cardKey);
+                    updateBattleDeckUI();
+                    hideCardStats();
+                };
+                
+            } else { // !isInDeck && isDeckFull
+                deckButton.innerText = 'Deck Full';
+                deckButton.className = 'w-full bg-gray-400 text-white font-bold py-2 px-4 rounded-lg mt-4 border-b-4 border-gray-600 transition-all'; // Gray style
+                deckButton.disabled = true;
+                deckButton.onclick = null;
+            }
+            // === END: Deck Button Logic ===
+
 
             // 3. Reset Gemini Section
             geminiTipsButton.disabled = false;
@@ -1665,6 +1802,7 @@
                 cardEl.addEventListener('click', () => showCardStats(cardKey));
                 cardCollectionGrid.appendChild(cardEl);
             }
+            updateBattleDeckUI(); // <-- NEW: Update deck UI when collection is initialized
         }
 
         // === NEW: Shop Definition ===
@@ -1849,8 +1987,8 @@
             });
         }
         
-        initCardCollectionUI();
-        initShopUI(); // Init shop once at start, NOT on tab switch
+        // initCardCollectionUI(); // This is called at the end now
+        // initShopUI(); // This is called at the end now
         
         function getDistance(entity1, entity2) {
             const dx = entity1.x - entity2.x;
@@ -2627,10 +2765,10 @@
                 this.lastTime = 0;
                 this.animationFrameId = null;
                 
-                this.playerFullDeck = shuffleArray(FULL_DECK_KEYS);
+                this.playerFullDeck = []; // This will be the 8-card deck
                 this.playerHand = [];
                 this.playerDeckQueue = [];
-                this.aiFullDeck = shuffleArray(FULL_DECK_KEYS);
+                this.aiFullDeck = []; // This will be the AI's 8 cards
                 this.aiHand = [];
                 this.aiDeckQueue = [];
                 
@@ -2652,10 +2790,19 @@
             addEffect(effect) { this.effects.push(effect); } 
 
             initDecks() {
+                // === NEW DECK LOGIC ===
+                // 'playerFullDeck' in the game context is the 8-card battle deck
+                this.playerFullDeck = shuffleArray(playerBattleDeck); 
+                
                 this.playerHand = this.playerFullDeck.slice(0, 4);
-                this.playerDeckQueue = this.playerFullDeck.slice(4, 8);
+                this.playerDeckQueue = this.playerFullDeck.slice(4, 8); // Get the other 4 cards
+                
+                // AI still uses random 8 cards from the full set
+                this.aiFullDeck = shuffleArray(FULL_DECK_KEYS); 
                 this.aiHand = this.aiFullDeck.slice(0, 4);
                 this.aiDeckQueue = this.aiFullDeck.slice(4, 8);
+                // === END NEW DECK LOGIC ===
+                
                 this.updateCardHandUI();
             }
             
@@ -2886,6 +3033,7 @@
                 });
                 
                 // 2. Update "Next" card preview
+                // *** THIS IS THE LOGIC FOR "NEXT CARD" ***
                 const nextCardKey = this.playerDeckQueue[0];
                 if (nextCardKey) {
                     const card = CARD_DECK[nextCardKey];
@@ -3029,7 +3177,7 @@
                 elixirBar.style.width = `${(this.playerElixir / ELIXIR_MAX) * 100}%`;
                 elixirText.innerText = `${Math.floor(this.playerElixir)} / ${ELIXIR_MAX}`;
                 
-                document.querySelectorAll('.card').forEach(el => {
+                document.querySelectorAll('#card-hand .card').forEach(el => {
                     const cardKey = this.playerHand[el.dataset.index];
                     if (cardKey && this.playerElixir < CARD_DECK[cardKey].cost) {
                         el.classList.add('disabled');
@@ -3261,6 +3409,7 @@ pro
         switchTab('battle'); // Start on battle tab
         initCardCollectionUI();
         initShopUI();
+        updateBattleDeckUI(); // <-- NEW: Call on initial load
         
     </script>
 </body>
