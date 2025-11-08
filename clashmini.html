@@ -987,21 +987,29 @@
         <!-- Tab 2: Cards (Hidden by default) -->
         <div id="tab-content-cards" class="tab-content hidden">
             
-            <!-- === NEW: Battle Deck Section === -->
+            <!-- === NEW: Battle Deck Section (Moved to top) === -->
             <div class="w-full max-w-md px-4">
-                <h3 class="text-xl font-bold text-center mb-2">Battle Deck</h3>
-                <div id="battle-deck-grid" class.bind="false" ="grid grid-cols-4 gap-4 bg-blue-900 p-4 rounded-lg border-2 border-blue-400">
+                <!-- Title based on screenshot -->
+                <h2 class="text-2xl font-bold text-center mb-2 text-white [text-shadow:_1px_1px_2px_rgb(0_0_0_/_50%)]">Battle Deck</h2>
+                <div id="battle-deck-grid" class="grid grid-cols-4 gap-4 bg-blue-900 p-4 rounded-lg border-2 border-blue-400 shadow-lg">
                     <!-- 8 slots populated by JS -->
                 </div>
-                <div id="battle-deck-stats" class="text-center text-sm mt-2 text-gray-300">
+                <div id="battle-deck-stats" class="text-center text-lg font-bold mt-2 text-yellow-400 [text-shadow:_1px_1px_2px_rgb(0_0_0_/_50%)]">
                     <!-- Deck stats populated by JS -->
                 </div>
             </div>
             <!-- === END: Battle Deck Section === -->
 
-            <h2 class="text-2xl font-bold mt-4">Card Collection</h2>
-            <div id="card-collection-grid" class="grid grid-cols-4 gap-4">
-                <!-- Populated by JS -->
+            <!-- Title based on screenshot -->
+            <h2 class="text-2xl font-bold mt-6 text-white [text-shadow:_1px_1px_2px_rgb(0_0_0_/_50%)]">Card Collection</h2>
+            <div id="card-collection-info" class="text-sm text-gray-300">
+                <!-- Placeholder for filters/count -->
+                <!-- MODIFIED: Added id="card-collection-total" -->
+                <span>Found: <span id="card-collection-count">0</span> / <span id="card-collection-total">17</span></span>
+            </div>
+
+            <div id="card-collection-grid" class="w-full max-w-md grid grid-cols-4 gap-4 px-4 mt-2">
+                <!-- Populated by JS, now filters deck cards -->
             </div>
         </div>
         
@@ -1215,6 +1223,13 @@
         let currentGame = null;
 
         playButton.addEventListener('click', () => {
+            // === NEW FIX: Check if button is disabled ===
+            if (playButton.disabled) {
+                console.log("Deck is not full, cannot start battle.");
+                return; // Не робити нічого, якщо кнопка неактивна
+            }
+            // === END FIX ===
+            
             mainMenuScreen.classList.add('hidden');
             gameScreen.classList.remove('hidden');
             resizeCanvas();
@@ -1625,6 +1640,17 @@
             // Update stats
             const avgElixir = (playerBattleDeck.length > 0) ? (totalElixir / playerBattleDeck.length).toFixed(1) : 0;
             battleDeckStats.innerText = `Deck: ${playerBattleDeck.length}/8 | Avg. Elixir: ${avgElixir}`;
+            
+            // === NEW LOGIC FOR DISABLING BATTLE BUTTON ===
+            const isDeckFull = playerBattleDeck.length === 8;
+            if (isDeckFull) {
+                playButton.disabled = false;
+                playButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                playButton.disabled = true;
+                playButton.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            // === END NEW LOGIC ===
         }
 
         // --- NEW: Card Stats Popup Logic ---
@@ -1743,8 +1769,8 @@
                 
                 deckButton.onclick = () => {
                     playerBattleDeck = playerBattleDeck.filter(key => key !== cardKey);
-                    updateBattleDeckUI();
-                    hideCardStats();
+                    hideCardStats(); // Спершу ховаємо вікно
+                    renderCardScreen(); // Потім оновлюємо ОБИДВА списки
                 };
                 
             } else if (!isInDeck && !isDeckFull) {
@@ -1754,8 +1780,8 @@
                 
                 deckButton.onclick = () => {
                     playerBattleDeck.push(cardKey);
-                    updateBattleDeckUI();
-                    hideCardStats();
+                    hideCardStats(); // Спершу ховаємо вікно
+                    renderCardScreen(); // Потім оновлюємо ОБИДВА списки
                 };
                 
             } else { // !isInDeck && isDeckFull
@@ -1787,9 +1813,25 @@
 
         // --- NEW: Populate Card Collection Tab ---
         const cardCollectionGrid = document.getElementById('card-collection-grid');
-        function initCardCollectionUI() {
+        const cardCollectionCount = document.getElementById('card-collection-count'); // NEW element
+        const cardCollectionTotal = document.getElementById('card-collection-total'); // NEW TOTAL element
+
+        // RENAMED and RE-WRITTEN
+        function renderCardCollectionUI() {
             cardCollectionGrid.innerHTML = ''; // Clear it
+            let collectionCount = 0; // NEW: Count cards
+            
+            const totalCardsOwned = FULL_DECK_KEYS.length; // Get total
+            
             for (const cardKey in CARD_DECK) {
+                // === THE NEW LOGIC ===
+                // Якщо карта ВЖЕ в колоді, пропустити її
+                if (playerBattleDeck.includes(cardKey)) {
+                    continue; 
+                }
+                // === END NEW LOGIC ===
+
+                collectionCount++; // Рахуємо карту
                 const card = CARD_DECK[cardKey];
                 const cardEl = document.createElement('div');
                 cardEl.className = `card rarity-${card.rarity.toLowerCase()}`; // Reuse and add rarity
@@ -1802,7 +1844,15 @@
                 cardEl.addEventListener('click', () => showCardStats(cardKey));
                 cardCollectionGrid.appendChild(cardEl);
             }
-            updateBattleDeckUI(); // <-- NEW: Update deck UI when collection is initialized
+            // cardCollectionCount.innerText = collectionCount; // OLD
+            cardCollectionCount.innerText = totalCardsOwned; // NEW: Show total owned
+            cardCollectionTotal.innerText = totalCardsOwned; // NEW: Update total
+        }
+        
+        // === NEW: Master Render Function ===
+        function renderCardScreen() {
+            updateBattleDeckUI();     // Оновлює верхню колоду
+            renderCardCollectionUI(); // Оновлює нижню колекцію (з фільтрацією)
         }
 
         // === NEW: Shop Definition ===
@@ -3407,9 +3457,11 @@ pro
         
         // --- Init App ---
         switchTab('battle'); // Start on battle tab
-        initCardCollectionUI();
+        // initCardCollectionUI(); // OLD
         initShopUI();
-        updateBattleDeckUI(); // <-- NEW: Call on initial load
+        // updateBattleDeckUI(); // OLD
+        
+        renderCardScreen(); // <-- NEW: Call master render function on load
         
     </script>
 </body>
