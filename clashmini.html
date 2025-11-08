@@ -1,0 +1,2898 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Clash Arena 8.1 (Gemini)</title> <!-- Оновлено версію -->
+    <!-- 1. Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 2. Custom styles for the game */
+        html, body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0c1c3a; /* Dark blue bg */
+            color: white;
+            overflow: hidden;
+            touch-action: none;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* --- Base Container --- */
+        .screen {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            max-width: 500px; /* Constrain width like a phone */
+            max-height: 900px; /* Constrain height */
+            margin: auto;
+            border: 4px solid #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- Main Menu Screen (NEW UI based on screenshot) --- */
+        #main-menu-screen {
+            background-color: #1a73e8; /* Base blue */
+            /* Tiled background pattern */
+            background-image: 
+                linear-gradient(135deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+                linear-gradient(225deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+                linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+                linear-gradient(315deg, rgba(255, 255, 255, 0.05) 25%, #1a73e8 25%);
+            background-size: 40px 40px;
+            justify-content: space-between;
+        }
+        
+        /* Top Bar (NEW DESIGN based on image_38c741.png) */
+        .menu-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+        .menu-top-left {
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 4px 8px;
+        }
+        .menu-level-badge {
+            background: #1d4ed8;
+            border: 2px solid #60a5fa;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            margin-right: 4px;
+        }
+        .menu-xp-bar {
+            width: 60px;
+            height: 10px;
+            background: #555;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .menu-xp-bar div { height: 100%; width: 20%; background: #22c55e; }
+        
+        .menu-top-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .menu-currency-box {
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 4px 8px;
+            font-weight: 600;
+        }
+        .menu-currency-box svg { width: 20px; height: 20px; margin-right: 4px; }
+        
+        /* Top right buttons */
+        .menu-top-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            position: absolute;
+            top: 55px; /* Below currency */
+            right: 12px;
+            z-index: 10;
+        }
+        .menu-icon-button {
+            width: 44px;
+            height: 44px;
+            background: #1d4ed8;
+            border-radius: 8px;
+            border: 2px solid #60a5fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .menu-icon-button svg { width: 28px; height: 28px; }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+
+        /* --- NEW: Tab Content Area --- */
+        .tab-content {
+            padding-top: 110px; /* Make space for top bars */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            /* Allow scrolling on card list */
+            overflow-y: auto; 
+            height: 100%; /* Take full height */
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+        
+        /* --- NEW: Shop Styles --- */
+        #tab-content-shop {
+            padding: 0; /* Override default tab padding */
+            padding-top: 110px;
+            background-color: #1a73e8; /* Re-apply base blue */
+            /* Re-apply tiled background pattern */
+            background-image: 
+                linear-gradient(135deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+                linear-gradient(225deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+                linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+                linear-gradient(315deg, rgba(255, 255, 255, 0.05) 25%, #1a73e8 25%);
+            background-size: 40px 40px;
+            padding-bottom: 90px; /* SCROLL FIX: Add padding to bottom */
+        }
+        .shop-section {
+            width: 100%;
+            padding: 0 12px 16px 12px;
+        }
+        .shop-section-header {
+            width: 100%;
+            background: #d946ef; /* Pink/Purple */
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .shop-item {
+            background: linear-gradient(145deg, #4b5563, #374151);
+            border: 3px solid #94a3b8;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        /* NEW: Purchased State */
+        .shop-item.purchased {
+            filter: grayscale(80%);
+            opacity: 0.7;
+        }
+        .shop-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+        }
+        .shop-item-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            color: #fff;
+            margin-bottom: 4px;
+            height: 30px; /* Ensure 2 lines max */
+            overflow: hidden;
+        }
+        .shop-item-image-container {
+            width: 100%;
+            height: 80px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            margin-bottom: 8px;
+        }
+        .shop-item-image-container img {
+            width: auto;
+            height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+        /* Updated for SVG */
+        .shop-item-image-container .card-image {
+            width: 100%;
+            height: 100%;
+            padding: 4px;
+        }
+        .shop-item-image-container .card-image svg {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+        
+        .shop-item-price {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            gap: 4px;
+            background: #1e40af;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 2px solid #60a5fa;
+            width: 100%;
+        }
+        .shop-item-price.free {
+            background: #16a34a; /* Green for free */
+            border-color: #86efac;
+        }
+        .shop-item-price.gem {
+            background: #0d9488;
+            border-color: #5eead4;
+        }
+        .shop-item-price svg {
+            width: 16px;
+            height: 16px;
+        }
+        .shop-item-price.uah {
+            font-size: 14px;
+            background: #16a34a;
+            border-color: #86efac;
+        }
+        /* NEW: Purchased Button Style */
+        .shop-item-price.purchased-btn {
+            background: #22c55e;
+            border-color: #86efac;
+            font-size: 14px;
+        }
+
+        /* Battle Button */
+        #play-button {
+            width: 200px;
+            padding: 16px;
+            font-size: 28px;
+            font-weight: 900;
+            color: #4a2a0a;
+            /* Gold/Yellow color */
+            background: linear-gradient(180deg, #fcd34d 0%, #fbbf24 100%);
+            border-radius: 16px; 
+            text-align: center;
+            border-bottom: 6px solid #b45309;
+            box-shadow: 0 5px 15px rgba(251, 191, 36, 0.4);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.5);
+        }
+        #play-button:active {
+            transform: translateY(2px);
+            border-bottom-width: 4px;
+            box-shadow: 0 2px 10px rgba(251, 191, 36, 0.4);
+        }
+        
+        /* Player Banner (v8.1) */
+        .menu-player-banner {
+            background: linear-gradient(135deg, #06b6d4, #0e7490);
+            border-radius: 12px;
+            padding: 8px 16px;
+            text-align: center;
+            border: 2px solid #67e8f9;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .menu-player-banner .name { 
+            font-size: 20px; 
+            font-weight: 700;
+            text-shadow: 1px 1px #083344;
+        }
+        .menu-player-banner .clan {
+            font-size: 14px;
+            color: #cffafe;
+            text-shadow: 1px 1px #083344;
+        }
+        .menu-player-banner .trophies { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 4px; 
+            font-size: 16px; 
+            color: #f59e0b; 
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        
+        .menu-arena-art {
+            width: 220px;
+            height: 165px;
+            background-color: #2e7d32; /* Green grass */
+            border: 4px solid #8d6e63; /* Brown border */
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            overflow: hidden;
+            position: relative;
+        }
+        .menu-arena-art svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        /* Chest Slots */
+        .menu-chest-slots {
+            display: flex;
+            justify-content: space-around;
+            gap: 8px;
+            padding: 0 16px;
+            margin-top: 24px;
+        }
+        .chest-slot {
+            width: 70px;
+            height: 85px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #aaa;
+            font-size: 10px;
+        }
+        .chest-slot.filled {
+            background: #854d0e;
+            border-color: #fcd34d;
+            font-size: 28px;
+        }
+
+        /* --- NEW: Card Collection Grid Styles --- */
+        #card-collection-grid {
+            width: 100%;
+            max-width: 400px; /* Constrain grid width */
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        /* Re-use .card style for collection */
+        .card {
+            width: 75px;
+            height: 110px;
+            background-color: #f0f0f0;
+            border: 3px solid #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px;
+            transition: all 0.15s ease;
+            position: relative;
+            background: linear-gradient(145deg, #e0e0e0, #c0c0c0);
+            color: #333;
+            font-weight: bold;
+            margin: auto; /* Center in grid cell */
+            cursor: pointer;
+        }
+        
+        /* --- NEW: SVG Card Image Style --- */
+        .card-image {
+            width: 100%;
+            height: 70px;
+            padding: 4px;
+            border-radius: 5px;
+            margin-top: 4px;
+        }
+        .card-image svg {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .card-cost {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            background-color: #a800a8;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        .card-name { font-size: 11px; text-align: center; color: #111; }
+
+        /* Bottom Nav */
+        .menu-bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: #1e3a8a;
+            padding: 8px 0;
+            border-top: 2px solid #60a5fa;
+            position: absolute; /* Stick to bottom */
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 20;
+        }
+        .menu-nav-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #a5b4fc; 
+            opacity: 0.7;
+            width: 65px;
+            padding-top: 4px;
+            cursor: pointer;
+        }
+        .menu-nav-button.active {
+            opacity: 1;
+            color: #fff; 
+            transform: scale(1.1);
+        }
+        .menu-nav-button.active .icon-bg {
+            background: #2563eb;
+        }
+        .menu-nav-button .icon-bg {
+            width: 50px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .menu-nav-button.active .icon-bg svg {
+            transform: scale(1.2);
+        }
+        .menu-nav-button svg { width: 28px; height: 28px; }
+
+
+        /* --- NEW: Card Stats Popup (CSS FIX) --- */
+        #card-stats-popup {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            padding: 16px;
+            /* BUG FIX: Removed display:flex. JS will add/remove 'hidden' and 'flex' classes. */
+        }
+        .popup-content {
+            background: #e2e8f0; /* Light gray background */
+            color: #1e293b; /* Dark text */
+            width: 100%;
+            max-width: 380px;
+            border-radius: 12px;
+            border: 4px solid #475569;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            padding: 12px;
+            position: relative;
+        }
+        #popup-close-btn {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 36px;
+            height: 36px;
+            background: #ef4444; /* Red */
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 50%;
+            border: 3px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .popup-header {
+            display: flex;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #94a3b8;
+        }
+        #popup-card-preview {
+            width: 90px;
+            height: 132px;
+            flex-shrink: 0;
+        }
+        .popup-info {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        #popup-card-name {
+            font-size: 24px;
+            font-weight: 900;
+            color: #000;
+        }
+        .popup-rarity-bar {
+            display: flex;
+            background: #8b5cf6; /* Purple */
+            color: white;
+            font-weight: 600;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 8px 0;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+        .popup-rarity-bar span {
+            padding: 4px 8px;
+            width: 50%;
+            text-align: center;
+        }
+        .popup-rarity-bar span:first-child {
+            border-right: 2px solid #a78bfa;
+        }
+        #popup-card-description {
+            font-size: 13px;
+            color: #334155;
+            line-height: 1.4;
+        }
+        .popup-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .popup-stat-box {
+            background: #cbd5e1;
+            border-radius: 8px;
+            padding: 8px;
+            border: 2px solid #94a3b8;
+        }
+        .popup-stat-box .label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 2px;
+        }
+        .popup-stat-box .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #000;
+        }
+
+        /* --- NEW: GEMINI API STYLES --- */
+        #gemini-tips-button {
+            width: 100%;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            font-weight: 700;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #c4b5fd;
+            border-bottom: 4px solid #5b21b6;
+            margin-top: 12px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+        #gemini-tips-button:active {
+            transform: translateY(1px);
+            border-bottom-width: 2px;
+        }
+        #gemini-tips-button:disabled {
+            background: #a78bfa;
+            opacity: 0.7;
+            cursor: wait;
+        }
+        #gemini-tips-result {
+            background-color: #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 14px;
+            color: #1e293b;
+            border: 2px solid #94a3b8;
+        }
+        #gemini-tips-result li {
+            margin-left: 16px;
+            list-style-type: disc;
+            margin-bottom: 4px;
+        }
+        /* --- END GEMINI STYLES --- */
+
+
+        /* --- Game Screen (Copied from before) --- */
+        #game-screen {
+            background: #111;
+        }
+        #game-arena {
+            flex-grow: 1; 
+            width: 100%;
+            display: block; 
+            /* *** НОВА ЗМІНА: Робимо курсор "ціллю" *** */
+            cursor: crosshair; 
+        }
+        #opponent-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #f87171; /* Red team */
+        }
+        #opponent-info .trophies {
+            color: #f59e0b;
+            font-size: 12px;
+        }
+        
+        #game-ui {
+            flex-shrink: 0; 
+            background-color: #3a2e2a; 
+            padding: 8px;
+            border-top: 4px solid #2a1e1a;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #hand-container {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center the whole group */
+            padding: 8px 0;
+            order: 1; /* Show before elixir */
+        }
+
+        #next-card-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 10px;
+        }
+        #next-card-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #ddd;
+            margin-bottom: 2px;
+        }
+        #next-card-preview {
+            width: 55px; /* Smaller card */
+            height: 80px;
+            background: linear-gradient(145deg, #e0e0e0, #c0c0c0);
+            border: 2px solid #fff;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2px;
+            position: relative;
+            font-weight: bold;
+        }
+        
+        /* --- NEW: SVG Next Card Image Style --- */
+        .next-card-image {
+            width: 100%;
+            height: 40px; /* Adjust height for preview card */
+            padding: 2px;
+            border-radius: 3px;
+            margin-top: 2px;
+        }
+        .next-card-image svg {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        #next-card-preview .card-cost {
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            background-color: #a800a8;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+        #next-card-preview .card-name { font-size: 9px; color: #111; text-align: center; }
+
+        #card-hand {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: auto; /* Remove fixed height */
+            gap: 8px; /* Space cards out */
+        }
+        .card.disabled {
+            filter: grayscale(80%);
+            opacity: 0.6;
+        }
+        .card.selected {
+            transform: translateY(-15px) scale(1.1);
+            border-color: #facc15;
+            box-shadow: 0 0 25px #facc15;
+        }
+        
+        #elixir-container {
+            width: 100%;
+            margin: 8px auto 0 auto; /* Margin top */
+            background: #111;
+            border-radius: 10px;
+            height: 20px;
+            border: 2px solid #c0c0c0;
+            overflow: hidden;
+            position: relative;
+            order: 2; /* Force to bottom */
+        }
+        #elixir-bar {
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, #d834d8, #a800a8);
+            transition: width 0.2s ease;
+        }
+        #elixir-text {
+            position: absolute;
+            inset: 0;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        #message {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 3em;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            z-index: 100;
+        }
+        #message-home-button {
+            font-size: 18px;
+            padding: 8px 16px;
+            margin-top: 15px;
+            background: #2563eb;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+    <!-- 3. Load Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="flex items-center justify-center">
+
+    <!-- 4. Main Menu Screen (NEW UI) -->
+    <div id="main-menu-screen" class="screen">
+        
+        <!-- Top Bar (NEW DESIGN based on image_38c741.png) -->
+        <div class="menu-top-bar">
+            <!-- Left Side: XP -->
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center border-2 border-blue-300 shadow-md">
+                    <!-- King Icon SVG -->
+                    <svg class="w-8 h-8" fill="#fde047" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v-2h-2v2zm0 4h2v6h-2v-6z"/></svg>
+                </div>
+                <!-- XP Bar -->
+                <div class="bg-blue-800 rounded-lg h-7 flex items-center px-2 relative w-40 border-2 border-blue-400 shadow-md">
+                    <div class="absolute left-0 top-0 h-full bg-blue-500 rounded-l-sm" style="width: 47%;"></div> <!-- 35286/75000 is ~47% -->
+                    <span class="relative text-sm font-bold z-10 text-white [text-shadow:_1px_1px_1px_rgb(0_0_0_/_100%)]">52</span>
+                    <span class="relative text-xs font-bold z-10 ml-auto text-white [text-shadow:_1px_1px_1px_rgb(0_0_0_/_100%)]">35286/75000</span>
+                </div>
+            </div>
+
+            <!-- Right Side: Currency -->
+            <div class="flex items-center space-x-2">
+                <!-- ** NEW ID ** -->
+                <div id="add-gold-btn" class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center border-2 border-green-300 shadow-md cursor-pointer">
+                    <!-- Plus Icon SVG -->
+                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z" clip-rule="evenodd" /></svg>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <!-- ** NEW ID ** -->
+                    <span id="gold-display" class="text-lg font-bold text-white [text-shadow:_1px_1px_1px_rgb(0_0_0_/_100%)]">259 928</span>
+                    <!-- Gold Coin SVG (filled checkmark style) -->
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#fbbf24"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1.12-9.62a.75.75 0 00-1.06 1.06l1.5 1.5a.75.75 0 001.06 0l3-3a.75.75 0 00-1.06-1.06L9.5 11.69l-1.12-1.12z" clip-rule="evenodd" /></svg>
+                </div>
+                <!-- ** NEW ID ** -->
+                 <div id="add-gems-btn" class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center border-2 border-green-300 shadow-md cursor-pointer">
+                    <!-- Plus Icon SVG -->
+                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z" clip-rule="evenodd" /></svg>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <!-- ** NEW ID ** -->
+                    <span id="gems-display" class="text-lg font-bold text-white [text-shadow:_1px_1px_1px_rgb(0_0_0_/_100%)]">12</span>
+                    <!-- Gem SVG -->
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#22c55e"><path d="M10.828 3.013c.252-.244.62-.244.872 0l4.243 4.13c.252.244.329.619.191.951L12.18 18.068c-.138.332-.5.549-.894.549h-2.572c-.394 0-.756-.217-.894-.549L3.874 8.094a.75.75 0 01.191-.951l4.243-4.13z" fill="#22c55e" /></svg>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Right Buttons -->
+        <div class="menu-top-buttons">
+            <div class="menu-icon-button">
+                <!-- Profile -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                <div class="notification-badge">1</div>
+            </div>
+            <div class="menu-icon-button">
+                <!-- Pass Royale -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-1.5h5.25m-7.5 0h.008v.008H4.5v-.008zM4.5 9h.008v.008H4.5V9zm.008 3h.008v.008H4.5v-.008zm.008 3h.008v.008H4.5v-.008zM2.25 6h19.5v12H2.25V6z" /></svg>
+            </div>
+            <div class="menu-icon-button">
+                <!-- Menu -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+            </div>
+        </div>
+
+        <!-- === NEW: Tab Content Area === -->
+        
+        <!-- Tab 1: Battle (Visible by default) -->
+        <div id="tab-content-battle" class="tab-content">
+            <!-- Player Banner (v8.1) -->
+            <div class="menu-player-banner">
+                <div class="name">RoyalkA</div>
+                <div class="clan">ГРЭМЛИНЫ 2.0</div>
+                <div class="trophies">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M15.19 3.684a.75.75 0 01.44 1.316l-2.006 1.003a.75.75 0 00-.398.53l-1.04 4.161a.75.75 0 00.44 1.316l1.04-1.04a.75.75 0 011.06 0l1.72 1.72a.75.75 0 010 1.06l-1.04 1.04a.75.75 0 001.316.44l4.161-1.04a.75.75 0 00.53-.398l1.003-2.006a.75.75 0 011.316.44l-1.003 4.887a.75.75 0 01-1.316-.44l1.003-2.006a.75.75 0 00-.53-.398l-4.161-1.04a.75.75 0 00-1.316.44l1.04 1.04a.75.75 0 01-1.06 0l-1.72-1.72a.75.75 0 010-1.06l1.04-1.04a.75.75 0 00-.44-1.316l-4.887-1.003a.75.75 0 01-.44-1.316l2.006-1.003a.75.75 0 00.398-.53l-1.04-4.161a.75.75 0 00-1.316-.44l-1.04 1.04a.75.75 0 01-1.06 0l-1.72-1.72a.75.75 0 010-1.06l1.04-1.04a.75.75 0 00.44-1.316L2.34 3.016a.75.75 0 01.44-1.316l2.006 1.003a.75.75 0 00.398.53l1.04 4.161a.75.75 0 001.316.44l1.04-1.04a.75.75 0 011.06 0l1.72 1.72a.75.75 0 010 1.06l-1.04 1.04a.75.75 0 00-.44 1.316l4.887 1.003zM4.75 5.5a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75z" clip-rule="evenodd" /></svg>
+                    <span>5018</span>
+                </div>
+            </div>
+            
+            <div class="menu-arena-art">
+                <svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0" y="65" width="200" height="20" fill="#1e40af" />
+                    <rect x="40" y="60" width="30" height="30" fill="#a16207" />
+                    <rect x="130" y="60" width="30" height="30" fill="#a16207" />
+                    <rect x="50" y="30" width="20" height="20" fill="#4b5563" />
+                    <rect x="130" y="30" width="20" height="20" fill="#4b5563" />
+                    <rect x="85" y="10" width="30" height="30" fill="#6b7280" />
+                    <rect x="50" y="100" width="20" height="20" fill="#4b5563" />
+                    <rect x="130" y="100" width="20" height="20" fill="#4b5563" />
+                    <rect x="85" y="110" width="30" height="30" fill="#6b7280" />
+                    <path d="M 50 75 L 50 100 M 150 75 L 150 100 M 95 110 L 95 100 L 50 100 M 105 110 L 105 100 L 150 100" stroke="#fde68a" stroke-width="4" fill="none" />
+                    <path d="M 50 75 L 50 50 M 150 75 L 150 50 M 95 40 L 95 50 L 50 50 M 105 40 L 105 50 L 150 50" stroke="#fde68a" stroke-width="4" fill="none" />
+                </svg>
+            </div>
+            
+            <div id="play-button">Battle</div>
+            
+            <div class="menu-chest-slots">
+                <div class="chest-slot filled">
+                    🛡️
+                    <span class="text-xs font-bold mt-1">ARENA 1</span>
+                </div>
+                <div class="chest-slot">Chest Slot</div>
+                <div class="chest-slot">Chest Slot</div>
+                <div class="chest-slot">Chest Slot</div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Cards (Hidden by default) -->
+        <div id="tab-content-cards" class="tab-content hidden">
+            <h2 class="text-2xl font-bold mt-4">Card Collection</h2>
+            <div id="card-collection-grid" class="grid grid-cols-4 gap-4">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+        
+        <!-- Tab 3: Shop (Placeholder) -->
+        <div id="tab-content-shop" class="tab-content hidden p-0"> <!-- Removed padding -->
+            <!-- Daily Deals Section -->
+            <div class="shop-section">
+                <h2 class="shop-section-header">Daily Deals</h2>
+                <div class="grid grid-cols-3 gap-3" id="daily-deals-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        
+            <!-- Currency Shop Section -->
+            <div class="shop-section">
+                <!-- Gems -->
+                <h2 class="shop-section-header" style="background-color: #16a34a;">Gems</h2>
+                <div class="grid grid-cols-3 gap-3" id="gem-offers-grid">
+                    <!-- Populated by JS -->
+                </div>
+        
+                <!-- Gold -->
+                <h2 class="shop-section-header" style="background-color: #f59e0b; margin-top: 16px;">Gold</h2>
+                <div class="grid grid-cols-3 gap-3" id="gold-offers-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 4: Clan (Placeholder) -->
+        <div id="tab-content-clan" class="tab-content hidden">
+            <h2 class="text-2xl font-bold mt-4">Clan</h2>
+            <p>(Тут буде клан)</p>
+        </div>
+        
+        <!-- Tab 5: Events (Placeholder) -->
+        <div id="tab-content-events" class="tab-content hidden">
+            <h2 class="text-2xl font-bold mt-4">Events</h2>
+            <p>(Тут будуть події)</p>
+        </div>
+
+        <!-- === NEW: Card Stats Popup (Hidden by default) === -->
+        <div id="card-stats-popup" class="hidden items-center justify-center">
+            <div class="popup-content">
+                <div id="popup-close-btn">&times;</div>
+                <div class="popup-header">
+                    <!-- Card Preview -->
+                    <div id="popup-card-preview" class="card">
+                        <!-- Populated by JS -->
+                    </div>
+                    <!-- Info -->
+                    <div class="popup-info">
+                        <h2 id="popup-card-name">Card Name</h2>
+                        <div class="popup-rarity-bar">
+                            <span id="popup-card-rarity">Common</span>
+                            <span id="popup-card-type">Troop</span>
+                        </div>
+                        <p id="popup-card-description">
+                            Card description goes here. It's a very good card.
+                        </p>
+                    </div>
+                </div>
+                <!-- Stats Grid -->
+                <div class="popup-stats-grid">
+                    <div class="popup-stat-box" id="stat-hp">
+                        <div class="label">❤️ Hitpoints</div>
+                        <div class="value" id="popup-card-hp">600</div>
+                    </div>
+                    <div class="popup-stat-box" id="stat-damage">
+                        <div class="label">⚔️ Damage</div>
+                        <div class="value" id="popup-card-damage">75</div>
+                    </div>
+                    <div class="popup-stat-box" id="stat-speed">
+                        <div class="label">🏃 Speed</div>
+                        <div class="value" id="popup-card-speed">Medium</div>
+                    </div>
+                    <div class="popup-stat-box" id="stat-range">
+                        <div class="label">🎯 Range</div>
+                        <div class="value" id="popup-card-range">1 (Melee)</div>
+                    </div>
+                    <div class="popup-stat-box" id="stat-attack-speed">
+                        <div class="label">⏱️ Hit Speed</div>
+                        <div class="value" id="popup-card-attack-speed">1.0s</div>
+                    </div>
+                    <div class="popup-stat-box" id="stat-targets">
+                        <div class="label">🎯 Targets</div>
+                        <div class="value" id="popup-card-targets">Ground</div>
+                    </div>
+                </div>
+                
+                <!-- === NEW: GEMINI API SECTION === -->
+                <div class="mt-4">
+                    <button id="gemini-tips-button" class="w-full">
+                        ✨ Поради від Gemini
+                    </button>
+                    <div id="gemini-tips-result" class="hidden mt-3 p-3 bg-gray-200 rounded-lg text-sm text-gray-800 border-2 border-gray-400">
+                        <!-- Gemini results will be loaded here -->
+                    </div>
+                </div>
+                <!-- === END GEMINI API SECTION === -->
+
+            </div>
+        </div>
+
+        
+        <!-- Bottom Nav -->
+        <div class="menu-bottom-nav">
+            <div id="nav-btn-shop" class="menu-nav-button">
+                <div class="icon-bg">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5A.75.75 0 0114.25 12h.75c.414 0 .75.336.75.75V21m-4.5 0v-7.5A.75.75 0 0110.5 12h.75c.414 0 .75.336.75.75V21m-4.5 0v-7.5A.75.75 0 016.75 12h.75c.414 0 .75.336.75.75V21m6-13.5h-1.5a.75.75 0 00-.75.75V6a.75.75 0 00.75.75h1.5a.75.75 0 00.75-.75V5.25a.75.75 0 00-.75-.75zM12 9a.75.75 0 00-.75.75V12a.75.75 0 00.75.75h.008a.75.75 0 00.75-.75V9.75a.75.75 0 00-.75-.75H12zM3 9.75A.75.75 0 013.75 9h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75V9.75zM4.5 12a.75.75 0 00-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 00.75-.75V12.75a.75.75 0 00-.75-.75H4.5zM3.75 15a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75v-.008zM4.5 18a.75.75 0 00-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 00.75-.75v-.008a.75.75 0 00-.75-.75H4.5zM18 9.75a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75h-.008a.75.75 0 01-.75-.75V9.75zM19.5 12a.75.75 0 00-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 00.75-.75V12.75a.75.75 0 00-.75-.75h-.008zM18.75 15a.75.75 0 01.75-.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75h-.008a.75.75 0 01-.75-.75v-.008zM19.5 18a.75.75 0 00-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 00.75-.75v-.008a.75.75 0 00-.75-.75h-.008z" /></svg>
+                </div>
+                <span>Shop</span>
+            </div>
+            <div id="nav-btn-cards" class="menu-nav-button"> <!-- Renamed from 'Deck' to 'Cards' -->
+                <div class="icon-bg">
+                    <!-- Cards -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <span>Cards</span>
+            </div>
+            <div id="nav-btn-battle" class="menu-nav-button active"> <!-- Active by default -->
+                <div class="icon-bg">
+                    <!-- Battle -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a.75.75 0 01-1.178-.14l-.512-.767a.75.75 0 01-.216-1.49l1.068-.89a1.125 1.125 0 00.405-.864v-.568a.75.75 0 01.672-.744C13.818 2.84 15 3.91 15 5.25v1.5c0 .414-.336.75-.75.75h-4.5a.75.75 0 01-.75-.75v-1.5c0-1.34 1.182-2.41 2.828-2.49a.75.75 0 01.672.744z" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25V19.5a.75.75 0 00.75.75h16.5a.75.75 0 00.75-.75V8.25m-18 0V5.625a.75.75 0 01.75-.75h16.5a.75.75 0 01.75.75v2.625m-18 0h18M5.25 14.25h.008v.008H5.25v-.008zm.75 0h.008v.008H6v-.008zm.75 0h.008v.008H6.75v-.008zm.75 0h.008v.008H7.5v-.008zm.75 0h.008v.008H8.25v-.008zm.75 0h.008v.008H9v-.008zm.75 0h.008v.008H9.75v-.008zm.75 0h.008v.008H10.5v-.008zm.75 0h.008v.008H11.25v-.008zm.75 0h.008v.008H12v-.008zm.75 0h.008v.008H12.75v-.008zm.75 0h.008v.008H13.5v-.008zm.75 0h.008v.008H14.25v-.008zm.75 0h.008v.008H15v-.008zm.75 0h.008v.008H15.75v-.008zm.75 0h.008v.008H16.5v-.008zm.75 0h.008v.008H17.25v-.008zm.75 0h.008v.008H18v-.008z" /></svg>
+                </div>
+                <span>Battle</span>
+            </div>
+            <div id="nav-btn-clan" class="menu-nav-button">
+                <div class="icon-bg">
+                    <!-- Clan -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <span>Clan</span>
+            </div>
+            <div id="nav-btn-events" class="menu-nav-button">
+                <div class="icon-bg">
+                    <!-- Events -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.339.986l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.34-.986l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
+                </div>
+                <span>Events</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Game Screen (Hidden by default) -->
+    <div id="game-screen" class="screen hidden">
+        <!-- ** NEW: Opponent Info Display ** -->
+        <div id="opponent-info" class="hidden">
+            <div id="opponent-name"></div>
+            <div id="opponent-trophies" class="trophies"></div>
+        </div>
+        
+        <div id="message" class="hidden">
+            <span id="message-text"></span>
+            <button id="message-home-button">В Меню</button>
+        </div>
+        <canvas id="game-arena"></canvas>
+        
+        <!-- === NEW UI LAYOUT === -->
+        <div id="game-ui">
+            <!-- 1. Hand Container (Next + Hand) -->
+            <div id="hand-container">
+                <!-- 1a. Next Card -->
+                <div id="next-card-container">
+                    <div id="next-card-label">Next:</div>
+                    <div id="next-card-preview">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <!-- 1b. Card Hand -->
+                <div id="card-hand">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+            
+            <!-- 2. Elixir Bar (At the bottom) -->
+            <div id="elixir-container">
+                <div id="elixir-bar"></div>
+                <div id="elixir-text">5 / 10</div>
+            </div>
+        </div>
+        <!-- === END NEW UI LAYOUT === -->
+
+    </div>
+
+    <!-- 6. The Game Engine (JavaScript) -->
+    <script>
+        // === APP CONTROLLER (Screen Switching) ===
+        const mainMenuScreen = document.getElementById('main-menu-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const playButton = document.getElementById('play-button');
+        const messageHomeButton = document.getElementById('message-home-button');
+        const opponentInfoEl = document.getElementById('opponent-info');
+        const opponentNameEl = document.getElementById('opponent-name');
+        const opponentTrophiesEl = document.getElementById('opponent-trophies');
+        
+        let currentGame = null;
+
+        playButton.addEventListener('click', () => {
+            mainMenuScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            resizeCanvas();
+            currentGame = new Game(ctx);
+            
+            opponentNameEl.innerText = currentGame.aiTrainer.name;
+            opponentTrophiesEl.innerText = `🏆 ${currentGame.aiTrainer.trophies}`;
+            opponentInfoEl.classList.remove('hidden');
+            
+            currentGame.start();
+        });
+
+        messageHomeButton.addEventListener('click', () => {
+            gameScreen.classList.add('hidden');
+            mainMenuScreen.classList.remove('hidden');
+            message.classList.add('hidden');
+            opponentInfoEl.classList.add('hidden'); // Hide opponent info
+            if (currentGame) {
+                currentGame.stopGame(); 
+                currentGame = null;
+            }
+        });
+        
+        // --- NEW: Tab Switching Logic ---
+        const tabContents = {
+            battle: document.getElementById('tab-content-battle'),
+            cards: document.getElementById('tab-content-cards'),
+            shop: document.getElementById('tab-content-shop'),
+            clan: document.getElementById('tab-content-clan'),
+            events: document.getElementById('tab-content-events')
+        };
+        const navButtons = {
+            battle: document.getElementById('nav-btn-battle'),
+            cards: document.getElementById('nav-btn-cards'),
+            shop: document.getElementById('nav-btn-shop'),
+            clan: document.getElementById('nav-btn-clan'),
+            events: document.getElementById('nav-btn-events')
+        };
+
+        function switchTab(tabName) {
+            // 1. Hide all tab content
+            Object.values(tabContents).forEach(tab => tab.classList.add('hidden'));
+            // 2. Deactivate all nav buttons
+            Object.values(navButtons).forEach(btn => btn.classList.remove('active'));
+            
+            // 3. Show the selected tab content
+            if (tabContents[tabName]) {
+                tabContents[tabName].classList.remove('hidden');
+            }
+            // 4. Activate the selected nav button
+            if (navButtons[tabName]) {
+                navButtons[tabName].classList.add('active');
+            }
+        }
+        
+        // Attach click listeners to nav buttons
+        navButtons.battle.addEventListener('click', () => switchTab('battle'));
+        navButtons.cards.addEventListener('click', () => switchTab('cards'));
+        navButtons.shop.addEventListener('click', () => switchTab('shop'));
+        navButtons.clan.addEventListener('click', () => switchTab('clan'));
+        navButtons.events.addEventListener('click', () => switchTab('events'));
+
+        // === NEW: Add listeners for '+' buttons ===
+        document.getElementById('add-gold-btn').addEventListener('click', () => switchTab('shop'));
+        document.getElementById('add-gems-btn').addEventListener('click', () => switchTab('shop'));
+
+        
+        // === SYNTAX ERROR FIX ===
+        // The broken code block from 7.8 is replaced with the correct one.
+        document.querySelectorAll('.menu-top-buttons, .menu-top-left, .menu-chest-slots').forEach(btn => {
+            if (btn.id !== 'play-button') {
+                btn.addEventListener('click', () => {
+                    console.log("Ця кнопка поки що косметична!");
+                });
+            }
+        });
+        // === END FIX ===
+
+
+        // === GAME ENGINE CORE ===
+        const canvas = document.getElementById('game-arena');
+        const ctx = canvas.getContext('2d');
+        const elixirBar = document.getElementById('elixir-bar');
+        const elixirText = document.getElementById('elixir-text');
+        const cardHandContainer = document.getElementById('card-hand');
+        const nextCardPreview = document.getElementById('next-card-preview'); 
+        const message = document.getElementById('message');
+        const messageText = document.getElementById('message-text');
+
+        // === NEW: Global Currency State ===
+        let userGold = 259928;
+        let userGems = 12;
+        const goldDisplay = document.getElementById('gold-display');
+        const gemsDisplay = document.getElementById('gems-display');
+        
+        function updateTopBarUI() {
+            // Formats number with spaces, e.g., 259928 -> "259 928"
+            goldDisplay.innerText = userGold.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            gemsDisplay.innerText = userGems;
+        }
+        updateTopBarUI(); // Call on initial load
+        // === END NEW ===
+
+        // === NEW: GEMINI API Integration ===
+        const API_KEY = ""; // Per instructions, leave empty
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+        const geminiTipsButton = document.getElementById('gemini-tips-button');
+        const geminiTipsResult = document.getElementById('gemini-tips-result');
+
+        geminiTipsButton.addEventListener('click', handleGeminiTipsClick);
+
+        async function handleGeminiTipsClick() {
+            const cardKey = cardStatsPopup.dataset.cardKey;
+            if (!cardKey) return;
+            
+            const cardName = CARD_DECK[cardKey].name;
+            
+            geminiTipsButton.disabled = true;
+            geminiTipsButton.innerText = 'Генерація... ✨';
+            geminiTipsResult.classList.remove('hidden');
+            geminiTipsResult.innerHTML = 'Думаю...';
+
+            const systemPrompt = "You are a world-class Clash Royale e-sports coach. Provide two brief, expert tips for the requested card. Use bullet points. Respond in Ukrainian. Do not use markdown like **.";
+            const userQuery = `Дай мені дві короткі поради для карти: ${cardName}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+            };
+
+            let response;
+            let retries = 3;
+            let delay = 1000;
+            let success = false;
+
+            while (retries > 0) {
+                try {
+                    response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        success = true;
+                        break; // Success
+                    } else if (response.status === 429 || response.status >= 500) {
+                        // Throttling or server error, wait and retry
+                        console.log(`Gemini API error ${response.status}, retrying in ${delay}ms...`);
+                        await new Promise(res => setTimeout(res, delay));
+                        delay *= 2; // Exponential backoff
+                        retries--;
+                    } else {
+                        // Other client-side error (e.g., 400), don't retry
+                        throw new Error(`Gemini API request failed with status ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    // Network error, retry
+                    await new Promise(res => setTimeout(res, delay));
+                    delay *= 2;
+                    retries--;
+                }
+            }
+
+            if (success) {
+                try {
+                    const result = await response.json();
+                    const text = result.candidates[0].content.parts[0].text;
+                    
+                    // Format bullet points for HTML
+                    const htmlText = '<ul>' + text.split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0)
+                        .map(line => `<li>${line.replace(/^[•*-\s]+/, '')}</li>`)
+                        .join('') + '</ul>';
+                        
+                    geminiTipsResult.innerHTML = htmlText;
+                } catch (parseError) {
+                    console.error("Gemini response parse error:", parseError);
+                    geminiTipsResult.innerText = 'Помилка: не вдалося обробити відповідь.';
+                }
+            } else {
+                geminiTipsResult.innerText = 'Помилка: не вдалося зв\'язатися з API Gemini.';
+            }
+
+            geminiTipsButton.disabled = false;
+            geminiTipsButton.innerText = '✨ Поради від Gemini';
+        }
+        // === END GEMINI API ===
+
+
+        let canvasRect;
+        function resizeCanvas() {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+            canvasRect = canvas.getBoundingClientRect();
+        }
+        window.addEventListener('resize', () => {
+            if (!gameScreen.classList.contains('hidden')) {
+                resizeCanvas();
+            }
+        });
+        
+        const ELIXIR_MAX = 10;
+        const ELIXIR_REGEN_RATE = 1.0; 
+        const GAME_STATE = {
+            RUNNING: 'RUNNING',
+            PLAYER_WINS: 'PLAYER_WINS',
+            AI_WINS: 'AI_WINS'
+        };
+        
+        // === NEW: SVG Graphics Library ===
+        const CARD_SVG_GRAPHICS = {
+            'knight': `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g fill="#94a3b8"><path d="M20 30 L50 10 L80 30 L80 60 L50 90 L20 60 Z" /><path d="M50 10 L50 90" stroke="#f8fafc" stroke-width="4" /></g><rect x="45" y="70" width="10" height="25" fill="#a16207" /><path d="M35 80 L65 80 L50 70 Z" fill="#e2e8f0" /></svg>`,
+            'archers': `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M60 10 C 80 30, 80 70, 60 90" stroke="#a16207" stroke-width="6" fill="none" /><path d="M62 10 L62 90" stroke="#fefce8" stroke-width="2" fill="none" /><path d="M60 50 L20 50 L30 45 M20 50 L30 55" stroke="#f59e0b" stroke-width="5" fill="none" /><path d="M25 40 L25 60" stroke="#a16207" stroke-width="5" fill="none" /></svg>`,
+            'fireball': `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="gradFB" cx="0.5" cy="0.5" r="0.5"><stop offset="0%" stop-color="#fef08a" /><stop offset="50%" stop-color="#f59e0b" /><stop offset="90%" stop-color="#b45309" /><stop offset="100%" stop-color="transparent" /></radialGradient></defs><circle cx="50" cy="50" r="40" fill="url(#gradFB)" /><path d="M50 10 C 30 30, 70 50, 50 50" fill="#fef08a" /><path d="M60 20 C 40 40, 80 60, 60 60" fill="#fde68a" /><path d="M40 70 C 60 50, 20 90, 40 70" fill="#fcd34d" /></svg>`,
+            'giant': `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="20" fill="#fca5a5" /><rect x="25" y="30" width="20" height="20" fill="#1e293b" rx="5"/><rect x="55" y="30" width="20" height="20" fill="#1e293b" rx="5"/><rect x="20" y="60" width="60" height="15" fill="#9f1239" rx="5"/><rect x="25" y="60" width="10" height="15" fill="#fef08a"/><rect x="65" y="60" width="10" height="15" fill="#fef08a"/></svg>`,
+            'wizard': `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M50 10 L20 90 L80 90 Z" fill="#3b0764" /><path d="M25 80 L75 80" stroke="#facc15" stroke-width="5" /><circle cx="50" cy="50" r="10" fill="#fef08a" /><path d="M50 50 l-10 -10 m 10 10 l 10 -10 m -10 10 l -10 10 m 10 -10 l 10 10" stroke="#f59e0b" stroke-width="4" /></svg>`,
+            'goblin': `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M50 10 C 80 10, 90 40, 90 60 C 90 90, 10 90, 10 60 C 10 40, 20 10, 50 10 Z" fill="#16a34a" /><path d="M20 40 L10 20 L30 30 Z" fill="#14532d" /><path d="M80 40 L90 20 L70 30 Z" fill="#14532d" /><circle cx="35" cy="45" r="10" fill="#fef08a" /><circle cx="65" cy="45" r="10" fill="#fef08a" /><rect x="30" y="70" width="40" height="10" rx="5" fill="#1e293b" /></svg>`,
+            'minipekka': `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M20 30 L50 10 L80 30 L80 70 L50 90 L20 70 Z" fill="#475569" /><path d="M10 35 L30 20" stroke="#f59e0b" stroke-width="8" /><path d="M90 35 L70 20" stroke="#f59e0b" stroke-width="8" /><rect x="35" y="40" width="30" height="20" fill="#3b82f6" rx="5" /><path d="M60 70 L90 60 L90 80 Z" fill="#94a3b8" /><path d="M70 75 L100 70 L100 90 Z" fill="#e2e8f0" /></svg>`,
+            'arrows': `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="rotate(-45 50 50)"><path d="M50 10 L50 70 L45 65 M 50 70 L 55 65" stroke="#f59e0b" stroke-width="6" fill="none" /><path d="M45 20 L45 80 L40 75 M 45 80 L 50 75" stroke="#f59e0b" stroke-width="6" fill="none" /><path d="M55 20 L55 80 L50 75 M 55 80 L 60 75" stroke="#f59e0b" stroke-width="6" fill="none" /></g></svg>`,
+        };
+
+        // ** NEW: Expanded CARD_DECK with full stats (imageUrl REMOVED) **
+        const CARD_DECK = {
+            'knight':    { 
+                name: 'Knight', emoji: '🛡️', cost: 3, type: 'unit',
+                rarity: 'Common', targets: 'Ground',
+                stats: { hp: 600, damage: 75, attackSpeed: 1, range: 1, speed: 'Medium' },
+                description: 'A tough melee fighter. Not tiny, not giant, just right.'
+            },
+            'archers':   { 
+                name: 'Archers', emoji: '🏹', cost: 3, type: 'unit',
+                rarity: 'Common', targets: 'Air & Ground',
+                stats: { hp: 250, damage: 50, attackSpeed: 0.8, range: 5, speed: 'Medium' },
+                description: 'A pair of lightly-armored ranged attackers. They help cover the sky.'
+            },
+            'fireball':  { 
+                name: 'Fireball', emoji: '🔥', cost: 4, type: 'spell',
+                rarity: 'Rare', targets: 'Air & Ground',
+                stats: { damage: 200, range: 2.5 }, // Range is AOE radius
+                description: 'Annnnnd... Fireball. Incinerates a small area.'
+            },
+            'giant':     { 
+                name: 'Giant', emoji: '👹', cost: 5, type: 'unit',
+                rarity: 'Rare', targets: 'Buildings',
+                stats: { hp: 1200, damage: 150, attackSpeed: 0.5, range: 1, speed: 'Slow' },
+                description: 'Slow but durable, only attacks buildings. A real wrecking ball!'
+            },
+            'wizard':    { 
+                name: 'Wizard', emoji: '🧙', cost: 5, type: 'unit',
+                rarity: 'Rare', targets: 'Air & Ground',
+                stats: { hp: 400, damage: 100, attackSpeed: 0.7, range: 4, speed: 'Medium' },
+                description: 'The most wonderful unit in the arena, casting powerful area damage spells.'
+            },
+            'goblin':    { 
+                name: 'Goblin', emoji: '🟢', cost: 2, type: 'unit',
+                rarity: 'Common', targets: 'Ground',
+                stats: { hp: 150, damage: 75, attackSpeed: 1.1, range: 1, speed: 'Very Fast' },
+                description: 'Three fast, melee attackers. Small, fast, green, and mean!'
+            },
+            'minipekka': { 
+                name: 'Mini P.E.K.K.A', emoji: '🤖', cost: 4, type: 'unit',
+                rarity: 'Rare', targets: 'Ground',
+                stats: { hp: 600, damage: 300, attackSpeed: 0.6, range: 1, speed: 'Medium' },
+                description: 'Pancakes! Loves to destroy anything in its path with its mighty sword.'
+            },
+            'arrows':    { 
+                name: 'Arrows', emoji: '🎯', cost: 3, type: 'spell',
+                rarity: 'Common', targets: 'Air & Ground',
+                stats: { damage: 150, range: 4 }, // Range is AOE radius
+                description: 'Rains arrows over a large area. Good for clearing swarms.'
+            }
+        };
+        const FULL_DECK_KEYS = Object.keys(CARD_DECK);
+
+        const TRAINER_LIST = [
+            { name: "Trainer Earl", trophies: 1200 }, { name: "Trainer Fikova", trophies: 1350 },
+            { name: "Trainer Mike", trophies: 1100 }, { name: "Trainer Klaus", trophies: 1400 },
+            { name: "Trainer Teemu", trophies: 1250 }, { name: "Trainer Jonas", trophies: 1300 },
+            { name: "Trainer George", trophies: 1150 }, { name: "Trainer James", trophies: 1450 },
+            { name: "Trainer Cheese", trophies: 1050 }, { name: "Trainer Urho", trophies: 1200 },
+            { name: "Trainer Paul", trophies: 1300 }, { name: "Trainer Gary", trophies: 1250 },
+            { name: "Trainer Red", trophies: 1400 }, { name: "Trainer Oak", trophies: 1150 },
+            { name: "Trainer Brock", trophies: 1350 }, { name: "Trainer Clemont", trophies: 1100 },
+            { name: "Trainer Grumpy", trophies: 1250 }, { name: "Trainer Rush", trophies: 1300 },
+            { name: "Trainer Clint", trophies: 1400 }, { name: "Trainer Basil", trophies: 1150 },
+            { name: "Trainer Sybil", trophies: 1350 }, { name: "Trainer Dopey", trophies: 1100 },
+            { name: "Trainer Marty", trophies: 1250 }, { name: "Trainer Arnold", trophies: 1450 },
+            { name: "Trainer Bashful", trophies: 1150 }, { name: "Trainer Dent", trophies: 1300 },
+            { name: "Trainer Marvin", trophies: 1250 }, { name: "Trainer Sneezy", trophies: 1350 },
+            { name: "Trainer Whisker", trophies: 1100 }, { name: "Trainer Snow", trophies: 1250 },
+            { name: "Trainer Sleepy", trophies: 1300 }, { name: "Trainer Freeze", trophies: 1150 },
+            { name: "Trainer Jason", trophies: 1250 }, { name: "Trainer Faker", trophies: 1350 },
+            { name: "Trainer Léon", trophies: 1100 }, { name: "Trainer Happy", trophies: 1250 },
+            { name: "Trainer Louis", trophies: 1300 }, { name: "Trainer Quincy", trophies: 1150 },
+            { name: "Trainer Max", trophies: 1250 }, { name: "Trainer Titan", trophies: 1350 },
+            { name: "Trainer Barry", trophies: 1100 }, { name: "Trainer Rocket", trophies: 1250 },
+            { name: "Trainer Swiss", trophies: 1300 }, { name: "Trainer Gravy", trophies: 1150 },
+            { name: "Trainer Shelly", trophies: 1250 }, { name: "Trainer Dragon", trophies: 1350 },
+            { name: "Trainer Gum", trophies: 1100 }, { name: "Trainer Osteri", trophies: 1250 },
+            { name: "Trainer Diamond", trophies: 1300 }, { name: "Trainer Cheddar", trophies: 1150 },
+            { name: "Trainer Cheddar II", trophies: 1250 }
+        ];
+
+        // --- NEW: Card Stats Popup Logic ---
+        const cardStatsPopup = document.getElementById('card-stats-popup');
+        const popupCloseBtn = document.getElementById('popup-close-btn');
+        const popupCardPreview = document.getElementById('popup-card-preview');
+        const popupCardName = document.getElementById('popup-card-name');
+        const popupCardRarity = document.getElementById('popup-card-rarity');
+        const popupCardType = document.getElementById('popup-card-type');
+        const popupCardDescription = document.getElementById('popup-card-description');
+        
+        // Stat boxes
+        const statBoxHp = document.getElementById('stat-hp');
+        const statBoxDamage = document.getElementById('stat-damage');
+        const statBoxSpeed = document.getElementById('stat-speed');
+        const statBoxRange = document.getElementById('stat-range');
+        const statBoxAttackSpeed = document.getElementById('stat-attack-speed');
+        const statBoxTargets = document.getElementById('stat-targets');
+        
+        // Stat values
+        const popupCardHp = document.getElementById('popup-card-hp');
+        const popupCardDamage = document.getElementById('popup-card-damage');
+        const popupCardSpeed = document.getElementById('popup-card-speed');
+        const popupCardRange = document.getElementById('popup-card-range');
+        const popupCardAttackSpeed = document.getElementById('popup-card-attack-speed');
+        const popupCardTargets = document.getElementById('popup-card-targets');
+
+        function showCardStats(cardKey) {
+            const card = CARD_DECK[cardKey];
+            if (!card) return;
+
+            // ** NEW: Store cardKey for Gemini **
+            cardStatsPopup.dataset.cardKey = cardKey;
+            
+            // 1. Fill Header
+            popupCardPreview.innerHTML = `
+                <div class="card-cost">${card.cost}</div>
+                <div class="card-image">${CARD_SVG_GRAPHICS[cardKey] || ''}</div>
+                <div class="card-name">${card.name}</div>
+            `;
+            popupCardName.innerText = card.name;
+            popupCardRarity.innerText = card.rarity;
+            popupCardType.innerText = card.type;
+            popupCardDescription.innerText = card.description;
+
+            // 2. Fill Stats Grid (and hide/show boxes)
+            const stats = card.stats;
+            if (stats.hp) {
+                popupCardHp.innerText = stats.hp;
+                statBoxHp.classList.remove('hidden');
+            } else {
+                statBoxHp.classList.add('hidden');
+            }
+            
+            if (stats.damage) {
+                popupCardDamage.innerText = stats.damage;
+                statBoxDamage.classList.remove('hidden');
+            } else {
+                statBoxDamage.classList.add('hidden');
+            }
+
+            if (stats.speed) {
+                popupCardSpeed.innerText = stats.speed;
+                statBoxSpeed.classList.remove('hidden');
+            } else {
+                statBoxSpeed.classList.add('hidden');
+            }
+
+            if (stats.range) {
+                let rangeText = stats.range;
+                if (card.type === 'unit' && stats.range <= 1.5) rangeText += ' (Melee)';
+                else if (card.type === 'unit') rangeText += ''; // Just the number
+                else if (card.type === 'spell') rangeText += ' (Radius)';
+                
+                popupCardRange.innerText = rangeText;
+                statBoxRange.classList.remove('hidden');
+            } else {
+                statBoxRange.classList.add('hidden');
+            }
+
+            if (stats.attackSpeed) {
+                popupCardAttackSpeed.innerText = (1 / stats.attackSpeed).toFixed(1) + 's';
+                statBoxAttackSpeed.classList.remove('hidden');
+            } else {
+                statBoxAttackSpeed.classList.add('hidden');
+            }
+            
+            if (card.targets) {
+                popupCardTargets.innerText = card.targets;
+                statBoxTargets.classList.remove('hidden');
+            } else {
+                statBoxTargets.classList.add('hidden');
+            }
+
+            // 3. Reset Gemini Section
+            geminiTipsButton.disabled = false;
+            geminiTipsButton.innerText = '✨ Поради від Gemini';
+            geminiTipsResult.classList.add('hidden');
+            geminiTipsResult.innerHTML = '';
+
+            // 4. Show Popup (BUG FIX)
+            cardStatsPopup.classList.remove('hidden');
+            cardStatsPopup.classList.add('flex'); // Add flex display properties
+        }
+
+        function hideCardStats() {
+            cardStatsPopup.classList.add('hidden');
+            cardStatsPopup.classList.remove('flex'); // Remove flex display properties
+        }
+        
+        popupCloseBtn.addEventListener('click', hideCardStats);
+
+        // --- NEW: Populate Card Collection Tab ---
+        const cardCollectionGrid = document.getElementById('card-collection-grid');
+        function initCardCollectionUI() {
+            cardCollectionGrid.innerHTML = ''; // Clear it
+            for (const cardKey in CARD_DECK) {
+                const card = CARD_DECK[cardKey];
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card'; // Reuse the existing .card style
+                cardEl.innerHTML = `
+                    <div class="card-cost">${card.cost}</div>
+                    <div class="card-image">${CARD_SVG_GRAPHICS[cardKey] || ''}</div>
+                    <div class="card-name">${card.name}</div>
+                `;
+                // **NEW: Add click listener**
+                cardEl.addEventListener('click', () => showCardStats(cardKey));
+                cardCollectionGrid.appendChild(cardEl);
+            }
+        }
+
+        // === NEW: Shop Definition ===
+        const SHOP_OFFERS = {
+            // ** RANDOMIZED: daily: [], **
+            gems: [
+                { type: 'gems', name: 'Pouch of Gems', amount: 500, price: 79.99, currency: 'uah', imageUrl: 'https://placehold.co/100x80/22c55e/ffffff?text=500+Gems' },
+                { type: 'gems', name: 'Bucket of Gems', amount: 1200, price: 199.99, currency: 'uah', imageUrl: 'https://placehold.co/100x80/22c55e/ffffff?text=1200+Gems' },
+                { type: 'gems', name: 'Wagon of Gems', amount: 2500, price: 399.99, currency: 'uah', imageUrl: 'https://placehold.co/100x80/22c55e/ffffff?text=2500+Gems' }
+            ],
+            gold: [
+                { type: 'gold', name: 'Pouch of Gold', amount: 1000, price: 60, currency: 'gems', imageUrl: 'https://placehold.co/100x80/fbbf24/000000?text=1000+Gold' },
+                { type: 'gold', name: 'Bucket of Gold', amount: 10000, price: 500, currency: 'gems', imageUrl: 'https://placehold.co/100x80/fbbf24/000000?text=10000+Gold' },
+                { type: 'gold', name: 'Wagon of Gold', amount: 100000, price: 4500, currency: 'gems', imageUrl: 'https://placehold.co/100x80/fbbf24/000000?text=100000+Gold' }
+            ]
+        };
+
+        // --- NEW: Gold and Gem SVG Icons ---
+        const GOLD_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#fbbf24"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z" clip-rule="evenodd" /></svg>`;
+        const GEM_ICON = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M10.828 3.013c.252-.244.62-.244.872 0l4.243 4.13c.252.244.329.619.191.951L12.18 18.068c-.138.332-.5.549-.894.549h-2.572c-.394 0-.756-.217-.894-.549L3.874 8.094a.75.75 0 01.191-.951l4.243-4.13zM5.44 8.75L9.126 17h1.748l3.686-8.25L10.43 4.28 5.44 8.75z" fill="#22c55e" /></svg>`;
+
+        // --- NEW: Populate Shop Tabs ---
+        const dailyDealsGrid = document.getElementById('daily-deals-grid');
+        const gemOffersGrid = document.getElementById('gem-offers-grid');
+        const goldOffersGrid = document.getElementById('gold-offers-grid');
+        let dailyDealsData = []; // ** Store generated deals **
+
+        // ** NEW: Generate Random Daily Deals **
+        function generateDailyDeals() {
+            const shuffledKeys = shuffleArray(FULL_DECK_KEYS);
+            const deals = [];
+            const numDeals = 3; // We want 3 daily deals
+
+            for (let i = 0; i < numDeals; i++) {
+                const key = shuffledKeys[i];
+                const card = CARD_DECK[key];
+                const currency = Math.random() > 0.3 ? 'gold' : 'gems';
+                let amount, price;
+
+                if (card.rarity === 'Common') {
+                    amount = (Math.floor(Math.random() * 5) + 1) * 10; // 10, 20, 30, 40, 50
+                    price = (currency === 'gold') ? amount * 10 : Math.ceil(amount / 5); // 100-500 gold or 2-10 gems
+                } else { // 'Rare'
+                    amount = (Math.floor(Math.random() * 5) + 1); // 1, 2, 3, 4, 5
+                    price = (currency === 'gold') ? amount * 500 : amount * 25; // 500-2500 gold or 25-125 gems
+                }
+
+                // Make sure spells are reasonable
+                if (card.type === 'spell') {
+                     amount = (Math.floor(Math.random() * 5) + 1); // Spells are usually low stack
+                     price = (currency === 'gold') ? amount * 400 : amount * 20;
+                }
+
+                deals.push({ type: 'card', key: key, amount: amount, price: Math.round(price), currency: currency });
+            }
+            return deals;
+        }
+
+        function getPriceHTML(price, currency) {
+            if (currency === 'gold') {
+                return `<div class="shop-item-price">${GOLD_ICON} <span>${price}</span></div>`;
+            }
+            if (currency === 'gems') {
+                return `<div class="shop-item-price gem">${GEM_ICON} <span>${price}</span></div>`;
+            }
+            if (currency === 'uah') {
+                return `<div class="shop-item-price uah"><span>${price.toFixed(2)} UAH</span></div>`;
+            }
+            return `<div class="shop-item-price free"><span>FREE!</span></div>`;
+        }
+
+        // ** NEW: Purchase Simulation Function **
+        function simulatePurchase(itemEl, priceEl, offer) {
+            if (itemEl.classList.contains('purchased')) return; // Already bought
+
+            // Check affordability
+            if (offer.currency === 'gems' && userGems < offer.price) {
+                console.log("Not enough gems!");
+                // Optionally shake the button or show a message
+                return; 
+            }
+            if (offer.currency === 'gold' && userGold < offer.price) {
+                console.log("Not enough gold!");
+                return;
+            }
+            // We assume UAH is always affordable (real money)
+
+            // Process transaction
+            if (offer.currency === 'gems') {
+                userGems -= offer.price;
+            }
+            if (offer.currency === 'gold') {
+                userGold -= offer.price;
+            }
+
+            // Add purchased item
+            if (offer.type === 'gems') {
+                userGems += offer.amount;
+            } else if (offer.type === 'gold') {
+                userGold += offer.amount;
+            }
+            // (We don't add 'card' types to an inventory yet, but we charge for them)
+
+            // Update UI
+            updateTopBarUI();
+            
+            // Show purchased state
+            itemEl.classList.add('purchased');
+            priceEl.classList.remove('gem', 'uah', 'free', 'shop-item-price');
+            priceEl.classList.add('purchased-btn');
+            priceEl.innerHTML = '✔ Куплено';
+        }
+
+        function initShopUI() {
+            // 1. Daily Deals (NOW RANDOMIZED & SAVED)
+            dailyDealsGrid.innerHTML = '';
+            // ** LOGIC CHANGE: Generate deals only if they don't exist **
+            if (dailyDealsData.length === 0) {
+                dailyDealsData = generateDailyDeals(); // <-- Generate random deals
+            }
+            
+            dailyDealsData.forEach(offer => { // <-- Iterate over saved deals
+                const card = CARD_DECK[offer.key];
+                const itemEl = document.createElement('div');
+                itemEl.className = 'shop-item';
+                
+                const priceHTML = getPriceHTML(offer.price, offer.currency);
+                
+                itemEl.innerHTML = `
+                    <div class="shop-item-title">${card.name} x${offer.amount}</div>
+                    <div class="shop-item-image-container">
+                        <div class="card-image">${CARD_SVG_GRAPHICS[offer.key] || ''}</div>
+                    </div>
+                    ${priceHTML}
+                `;
+                
+                const priceEl = itemEl.querySelector('.shop-item-price');
+                itemEl.addEventListener('click', () => simulatePurchase(itemEl, priceEl, offer));
+                
+                dailyDealsGrid.appendChild(itemEl);
+            });
+            
+            // 2. Gem Offers
+            gemOffersGrid.innerHTML = '';
+            SHOP_OFFERS.gems.forEach(offer => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'shop-item';
+                
+                const priceHTML = getPriceHTML(offer.price, offer.currency);
+                
+                itemEl.innerHTML = `
+                    <div class="shop-item-title">${offer.name}</div>
+                    <div class="shop-item-image-container">
+                        <img src="${offer.imageUrl}" onerror="this.src='https://placehold.co/100x80/22c55e/ffffff?text=Gems'">
+                    </div>
+                    ${priceHTML}
+                `;
+                
+                const priceEl = itemEl.querySelector('.shop-item-price');
+                itemEl.addEventListener('click', () => simulatePurchase(itemEl, priceEl, offer));
+                
+                gemOffersGrid.appendChild(itemEl);
+            });
+        
+            // 3. Gold Offers
+            goldOffersGrid.innerHTML = '';
+            SHOP_OFFERS.gold.forEach(offer => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'shop-item';
+                
+                const priceHTML = getPriceHTML(offer.price, offer.currency);
+
+                itemEl.innerHTML = `
+                    <div class="shop-item-title">${offer.name}</div>
+                    <div class="shop-item-image-container">
+                        <img src="${offer.imageUrl}" onerror="this.src='https://placehold.co/100x80/fbbf24/000000?text=Gold'">
+                    </div>
+                    ${priceHTML}
+                `;
+                
+                const priceEl = itemEl.querySelector('.shop-item-price');
+                itemEl.addEventListener('click', () => simulatePurchase(itemEl, priceEl, offer));
+                
+                goldOffersGrid.appendChild(itemEl);
+            });
+        }
+        
+        initCardCollectionUI();
+        initShopUI(); // Init shop once at start, NOT on tab switch
+        
+        function getDistance(entity1, entity2) {
+            const dx = entity1.x - entity2.x;
+            const dy = entity1.y - entity2.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+        
+        function shuffleArray(array) {
+            let newArr = [...array];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        }
+
+        class Entity {
+            constructor(x, y, width, height, health, team) {
+                this.x = x;
+                this.y = y;
+                this.width = width; 
+                this.height = height; 
+                this.health = health;
+                this.maxHealth = health;
+                this.team = team;
+                this.target = null;
+                this.isAlive = true;
+                this.emoji = '❓';
+                this.fontSize = 30; 
+            }
+            draw(ctx) {
+                if (!this.isAlive) return; 
+                
+                ctx.font = `${this.fontSize}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.emoji, this.x, this.y);
+                this.drawHealthBar(ctx);
+            }
+            drawHealthBar(ctx) {
+                const barWidth = this.width;
+                const barHeight = 5;
+                const yOffset = this.height / 2;
+                ctx.fillStyle = '#7f1d1d'; 
+                ctx.fillRect(this.x - barWidth / 2, this.y + yOffset, barWidth, barHeight);
+                const healthPercent = this.health / this.maxHealth;
+                ctx.fillStyle = this.team === 'player' ? '#22c55e' : '#ef4444'; 
+                ctx.fillRect(this.x - barWidth / 2, this.y + yOffset, barWidth * healthPercent, barHeight);
+            }
+            takeDamage(amount) {
+                this.health -= amount;
+                if (this.health <= 0) {
+                    this.health = 0;
+                    this.isAlive = false;
+                }
+            }
+            update(deltaTime, game) {}
+        }
+
+        class Effect {
+            constructor(x, y, lifetime) {
+                this.x = x;
+                this.y = y;
+                this.lifetime = lifetime;
+                this.isAlive = true;
+            }
+            update(deltaTime) {
+                this.lifetime -= deltaTime;
+                if (this.lifetime <= 0) {
+                    this.isAlive = false;
+                }
+            }
+            draw(ctx) {}
+        }
+
+        class Explosion extends Effect {
+            constructor(x, y, radius) {
+                super(x, y, 0.5); // 0.5 second lifetime
+                this.maxRadius = radius;
+                this.currentRadius = 0;
+            }
+            update(deltaTime) {
+                super.update(deltaTime);
+                this.currentRadius = (1 - (this.lifetime / 0.5)) * this.maxRadius; // Scale from 0 to maxRadius
+            }
+            draw(ctx) {
+                ctx.fillStyle = 'rgba(255, 165, 0, 0.7)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.currentRadius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = (this.lifetime / 0.5);
+                ctx.font = '40px Arial';
+                ctx.fillText('💥', this.x, this.y);
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        class ArrowRain extends Effect {
+            constructor(x, y, radius) {
+                super(x, y, 0.6); // 0.6 second lifetime
+                this.radius = radius;
+                this.arrows = [];
+                for (let i=0; i < 10; i++) {
+                    this.arrows.push({
+                        x: this.x + (Math.random() - 0.5) * this.radius * 2,
+                        y: this.y + (Math.random() - 0.5) * this.radius * 2 - 30, // Start above
+                        fallSpeed: 500 + Math.random() * 200,
+                        delay: Math.random() * 0.2 // Staggered fall
+                    });
+                }
+            }
+            update(deltaTime) {
+                super.update(deltaTime);
+                this.arrows.forEach(arrow => {
+                    if (this.lifetime < (0.6 - arrow.delay)) {
+                        arrow.y += arrow.fallSpeed * deltaTime;
+                    }
+                });
+            }
+            draw(ctx) {
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.globalAlpha = Math.max(0, this.lifetime / 0.6);
+                this.arrows.forEach(arrow => {
+                    ctx.fillText('↓', arrow.x, arrow.y);
+                });
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        class Tower extends Entity {
+            constructor(x, y, health, team, game) {
+                super(x, y, 40, 40, health, team); 
+                this.game = game;
+                this.attackRange = 150; 
+                this.attackSpeed = 1.2; 
+                this.attackWindup = 0.1; 
+                this.attackCooldownTime = 1 / this.attackSpeed;
+                this.attackTimer = 0;
+                this.state = 'IDLE';
+            }
+
+            draw(ctx) {
+                if (!this.isAlive) {
+                    ctx.font = `30px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.globalAlpha = 0.7;
+                    ctx.fillText('🧱', this.x, this.y); 
+                    ctx.globalAlpha = 1.0;
+                    return; 
+                }
+                
+                ctx.fillStyle = '#4a4a4a'; // Dark grey base
+                ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+                
+                ctx.font = `${this.fontSize}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.emoji, this.x, this.y);
+                
+                this.drawHealthBar(ctx);
+            }
+
+            update(deltaTime, game) {
+                if (!this.isAlive) return;
+                
+                this.attackTimer -= deltaTime;
+                
+                // ** AI LOGIC v7.1 (Critical Fix) **
+                
+                // 1. Find Target if needed
+                if (!this.target || !this.target.isAlive || getDistance(this, this.target) > this.attackRange) {
+                    this.findTarget(game.entities);
+                }
+
+                if (this.state === 'IDLE') {
+                    if (this.target && this.attackTimer <= 0) {
+                        this.state = 'ATTACKING';
+                        this.attackTimer = this.attackWindup;
+                    }
+                } else if (this.state === 'ATTACKING') {
+                    if (this.attackTimer <= 0) {
+                        if (this.target && this.target.isAlive && getDistance(this, this.target) <= this.attackRange) {
+                            this.attack();
+                        }
+                        this.attackTimer = this.attackCooldownTime; 
+                        this.state = 'IDLE';
+                    }
+                }
+            }
+            findTarget(allEntities) {
+                let closestTarget = null; 
+                let minDistance = this.attackRange;
+
+                for (const entity of allEntities) {
+                    if (entity.team !== this.team && entity.isAlive) {
+                        const distance = getDistance(this, entity);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            closestTarget = entity;
+                        }
+                    }
+                }
+                this.target = closestTarget;
+            }
+            attack() {
+                this.game.addProjectile(new Projectile(this.x, this.y - this.height / 2, this.target, 35, this.team, '⚫', 15));
+            }
+        }
+        
+        class KingTower extends Tower {
+            constructor(x, y, health, team, game) {
+                super(x, y, health, team, game);
+                this.emoji = '👑';
+                this.fontSize = 35; 
+                this.width = 50; 
+                this.height = 50;
+                this.isKing = true;
+            }
+        }
+        
+        class PrincessTower extends Tower {
+             constructor(x, y, health, team, game) {
+                super(x, y, health, team, game);
+                this.emoji = '🏹'; 
+                this.fontSize = 30; 
+                this.isKing = false;
+            }
+        }
+
+        class Unit extends Entity {
+            constructor(x, y, width, height, health, team, speed, attackRange, attackDamage, attackSpeed, sightRange, attackWindup) {
+                super(x, y, width, height, health, team);
+                this.speed = speed;
+                this.attackRange = attackRange;
+                this.attackDamage = attackDamage;
+                this.attackSpeed = attackSpeed;
+                this.sightRange = sightRange;
+                this.lane = (x < canvas.width / 2) ? 'left' : 'right';
+                this.attackWindup = attackWindup;
+                this.attackCooldownTime = 1 / attackSpeed;
+                this.attackTimer = 0; 
+                this.state = 'IDLE';
+                this.isAggroed = false; 
+            }
+            
+            // ** AI LOGIC v7.1 (Critical Fix) **
+            update(deltaTime, game) {
+                if (!this.isAlive) return;
+                this.attackTimer -= deltaTime;
+
+                // --- 1. TARGET ACQUISITION (Пошук цілі) ---
+                // (v8.1 Fix: This logic was flawed, reverting to a more robust check)
+                if (this.state === 'ATTACKING') {
+                     // In windup, do nothing
+                     if (this.attackTimer > 0) {
+                         return;
+                     }
+                     
+                     // Windup finished, perform attack
+                     if (this.target && this.target.isAlive && getDistance(this, this.target) <= this.attackRange) {
+                         this.attack(this.target); 
+                     }
+                     this.attackTimer = this.attackCooldownTime; // Start cooldown
+                     this.state = 'IDLE';
+                     // After attacking, fall through to IDLE state to re-evaluate
+                }
+                
+                // --- Find Target ---
+                // (v8.1 Fix) We find a target if we don't have one, or if it's dead, OR if we are just walking (MOVING)
+                if (!this.target || !this.target.isAlive || this.state === 'MOVING') {
+                    if (this.target && !this.target.isAlive) {
+                        this.target = null;
+                        this.isAggroed = false;
+                    }
+                    this.findTarget(game);
+                }
+                
+                // If still no target, do nothing
+                if (!this.target) {
+                    this.state = 'IDLE';
+                    return; 
+                }
+                
+                // --- 2. STATE MACHINE (Машина станів) ---
+                const distance = getDistance(this, this.target);
+
+                if (this.state === 'IDLE') {
+                    if (distance <= this.attackRange) {
+                        if (this.attackTimer <= 0) { 
+                            this.state = 'ATTACKING';
+                            this.attackTimer = this.attackWindup; 
+                        }
+                    } else {
+                        // (v8.1 Fix) Target is alive but out of range
+                        this.state = 'MOVING';
+                    }
+                } else if (this.state === 'MOVING') {
+                    if (distance <= this.attackRange) {
+                        this.state = 'IDLE'; // Arrived at target
+                    } else {
+                        this.move(deltaTime, this.target); 
+                    }
+                }
+            }
+            
+            findTarget(game) {
+                const enemyTeam = this.team === 'player' ? 'ai' : 'player';
+                const enemyUnits = game.entities.filter(e => e.team === enemyTeam && e.isAlive);
+                let closestUnit = null;
+                let minDistance = this.sightRange; 
+
+                // 1. Find closest UNIT
+                for (const unit of enemyUnits) {
+                    const distance = getDistance(this, unit);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestUnit = unit;
+                    }
+                }
+                
+                if (closestUnit) {
+                    this.target = closestUnit;
+                    this.isAggroed = true;
+                    return; 
+                }
+                
+                // 2. No unit found. If we are ALREADY AGGROED (meaning our unit-target just died),
+                // we should stop and find a new target (which will be a tower).
+                // If we were NOT aggroed, we just continue to our default tower target.
+                if (this.isAggroed || !this.target || !this.target.isAlive) {
+                    this.isAggroed = false; // Lost unit aggro
+                    const enemyTowers = game.getTowers(enemyTeam);
+                    if (this.lane === 'left' && enemyTowers.left.isAlive) {
+                        this.target = enemyTowers.left;
+                    } else if (this.lane === 'right' && enemyTowers.right.isAlive) {
+                        this.target = enemyTowers.right;
+                    } else {
+                        this.target = enemyTowers.king;
+                    }
+                }
+                // If we were not aggroed, and our target (a tower) is still alive, this.target remains unchanged.
+            }
+
+
+            move(deltaTime, target) {
+                const w = canvas.width;
+                const h = canvas.height;
+                const midY = h / 2;
+                let waypoint = { x: target.x, y: target.y };
+                const onMyStartingSide = (this.team === 'player' && this.y > midY) || (this.team === 'ai' && this.y < midY);
+                const targetOnMySide = (this.team === 'player' && target.y > midY) || (this.team === 'ai' && target.y < midY);
+                if (onMyStartingSide && !targetOnMySide) {
+                    const laneX = (this.lane === 'left') ? (w / 4) : (w * 3 / 4); 
+                    const bridgeWaypointY = (this.team === 'player') ? (midY - 30) : (midY + 30); 
+                    waypoint.x = laneX;
+                    waypoint.y = bridgeWaypointY;
+                }
+                this.moveToWaypoint(deltaTime, waypoint);
+            }
+            moveToWaypoint(deltaTime, waypoint) {
+                const angle = Math.atan2(waypoint.y - this.y, waypoint.x - this.x);
+                const distanceToWaypoint = getDistance(this, waypoint);
+                if (distanceToWaypoint > this.speed * deltaTime) { 
+                    this.x += Math.cos(angle) * this.speed * deltaTime;
+                    this.y += Math.sin(angle) * this.speed * deltaTime;
+                } else if (distanceToWaypoint > 5) {
+                    this.x = waypoint.x;
+                    this.y = waypoint.y;
+                }
+            }
+            attack(target) {
+                target.takeDamage(this.attackDamage);
+            }
+        }
+
+        class Knight extends Unit {
+            constructor(x, y, team) {
+                super(x, y, 30, 30, CARD_DECK.knight.stats.hp, team, 40, 35, CARD_DECK.knight.stats.damage, CARD_DECK.knight.stats.attackSpeed, 160, 0.4); 
+                this.emoji = '🛡️';
+                this.fontSize = 30;
+            }
+        }
+        
+        class Archer extends Unit {
+            constructor(x, y, team, game) {
+                super(x, y, 25, 25, CARD_DECK.archers.stats.hp, team, 40, 140, CARD_DECK.archers.stats.damage, CARD_DECK.archers.stats.attackSpeed, 180, 0.2);
+                this.game = game;
+                this.emoji = '🏹';
+                this.fontSize = 30;
+            }
+            attack(target) {
+                this.game.addProjectile(new Projectile(this.x, this.y, target, this.attackDamage, this.team, '➡️', 15));
+            }
+        }
+
+        class Goblin extends Unit {
+            constructor(x, y, team) {
+                super(x, y, 25, 25, CARD_DECK.goblin.stats.hp, team, 60, 35, CARD_DECK.goblin.stats.damage, CARD_DECK.goblin.stats.attackSpeed, 160, 0.3); 
+                this.emoji = '🟢';
+                this.fontSize = 25;
+            }
+        }
+
+        class MiniPekka extends Unit {
+            constructor(x, y, team) {
+                super(x, y, 35, 35, CARD_DECK.minipekka.stats.hp, team, 40, 35, CARD_DECK.minipekka.stats.damage, CARD_DECK.minipekka.stats.attackSpeed, 160, 0.8); 
+                this.emoji = '🤖';
+                this.fontSize = 35;
+            }
+        }
+
+        class Wizard extends Unit {
+             constructor(x, y, team, game) {
+                super(x, y, 30, 30, CARD_DECK.wizard.stats.hp, team, 40, 130, CARD_DECK.wizard.stats.damage, CARD_DECK.wizard.stats.attackSpeed, 170, 0.4);
+                this.game = game;
+                this.emoji = '🧙';
+                this.fontSize = 35;
+            }
+            attack(target) {
+                this.game.addProjectile(new MagicBolt(this.x, this.y, target, this.attackDamage, this.team, this.game));
+            }
+        }
+
+        class Giant extends Unit {
+            constructor(x, y, team) {
+                super(x, y, 40, 40, CARD_DECK.giant.stats.hp, team, 25, 40, CARD_DECK.giant.stats.damage, CARD_DECK.giant.stats.attackSpeed, 350, 0.6);
+                this.emoji = '👹';
+                this.fontSize = 40;
+            }
+            
+            findTarget(game) {
+                const enemyTowers = game.getTowers(this.team === 'player' ? 'ai' : 'player');
+                let targetTower = null;
+
+                if (this.lane === 'left' && enemyTowers.left.isAlive) {
+                    targetTower = enemyTowers.left;
+                } else if (this.lane === 'right' && enemyTowers.right.isAlive) {
+                    targetTower = enemyTowers.right;
+                } else {
+                    targetTower = enemyTowers.king;
+                }
+                return targetTower; 
+            }
+            
+            update(deltaTime, game) {
+                if (!this.isAlive) return;
+                this.attackTimer -= deltaTime;
+                
+                if (!this.target || !this.target.isAlive) {
+                    this.target = this.findTarget(game);
+                }
+                if (!this.target) return; 
+                
+                const distance = getDistance(this, this.target);
+
+                if (this.state === 'ATTACKING') {
+                    if (this.attackTimer <= 0) { 
+                        if (this.target && this.target.isAlive && getDistance(this, this.target) <= this.attackRange) {
+                            this.attack(this.target);
+                        }
+                        this.attackTimer = this.attackCooldownTime;
+                        this.state = 'IDLE'; 
+                    }
+                } else if (this.state === 'IDLE') {
+                    if (distance <= this.attackRange) {
+                        if (this.attackTimer <= 0) { 
+                            this.state = 'ATTACKING';
+                            this.attackTimer = this.attackWindup; 
+                        }
+                    } else {
+                        this.state = 'MOVING'; 
+                    }
+                } else if (this.state === 'MOVING') {
+                    if (distance <= this.attackRange) {
+                        this.state = 'IDLE'; 
+                    } else {
+                        this.move(deltaTime, this.target); 
+                    }
+                }
+            }
+        }
+        
+        class Projectile {
+            constructor(x, y, target, damage, team, emoji, size) {
+                this.x = x;
+                this.y = y;
+                this.target = target;
+                this.damage = damage;
+                this.team = team;
+                this.speed = 300;
+                this.isAlive = true;
+                this.emoji = emoji;
+                this.fontSize = size;
+            }
+            update(deltaTime) {
+                if (!this.isAlive || !this.target.isAlive) {
+                    this.isAlive = false;
+                    return;
+                }
+                const distance = getDistance(this, {x: this.target.x, y: this.target.y});
+                if (distance < 10) { 
+                    this.onHit();
+                    return;
+                }
+                const angle = Math.atan2(this.target.y - this.y, this.target.x - this.x);
+                this.x += Math.cos(angle) * this.speed * deltaTime;
+                this.y += Math.sin(angle) * this.speed * deltaTime;
+            }
+            onHit() {
+                this.target.takeDamage(this.damage);
+                this.isAlive = false;
+            }
+            draw(ctx) {
+                ctx.font = `${this.fontSize}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.emoji, this.x, this.y);
+            }
+        }
+        
+        class Fireball extends Projectile {
+            constructor(x, y, targetX, targetY, damage, team, game) {
+                const pseudoTarget = { x: targetX, y: targetY, isAlive: true };
+                super(x, y, pseudoTarget, damage, team, '🔥', 30);
+                this.game = game;
+                this.aoeRadius = CARD_DECK.fireball.stats.range * 24; // 2.5 * 24 = 60
+                this.speed = 250;
+            }
+            onHit() {
+                this.isAlive = false;
+                this.game.addEffect(new Explosion(this.x, this.y, this.aoeRadius)); 
+                const allEntities = [...this.game.entities, ...this.game.getAllTowers()];
+                for (const entity of allEntities) {
+                    if (entity.team !== this.team && entity.isAlive) {
+                        const distance = getDistance(this, entity);
+                        if (distance <= this.aoeRadius) {
+                            entity.takeDamage(this.damage);
+                        }
+                    }
+                }
+            }
+            draw(ctx) {
+                const size = this.fontSize + (this.y / canvas.height) * 15;
+                ctx.font = `${size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.emoji, this.x, this.y);
+            }
+        }
+
+        class MagicBolt extends Projectile {
+             constructor(x, y, target, damage, team, game) {
+                super(x, y, target, damage, team, '✨', 20);
+                this.game = game;
+                this.aoeRadius = 50; 
+                this.speed = 280;
+            }
+            onHit() {
+                this.isAlive = false;
+                this.game.addEffect(new Explosion(this.x, this.y, this.aoeRadius)); // Use same explosion
+                const allEntities = [...this.game.entities, ...this.game.getAllTowers()];
+                for (const entity of allEntities) {
+                    if (entity.team !== this.team && entity.isAlive) {
+                        const distance = getDistance(this, entity);
+                        if (distance <= this.aoeRadius) {
+                            entity.takeDamage(this.damage);
+                        }
+                    }
+                }
+            }
+        }
+        
+        class Game {
+            constructor(ctx) {
+                this.ctx = ctx;
+                this.entities = [];
+                this.projectiles = [];
+                this.effects = []; 
+                const w = canvas.width;
+                const h = canvas.height;
+                
+                this.playerKingTower = new KingTower(w / 2, h - 50, 1500, 'player', this);
+                this.playerLeftTower = new PrincessTower(w / 4, h - 150, 1000, 'player', this);
+                this.playerRightTower = new PrincessTower(w * 3 / 4, h - 150, 1000, 'player', this);
+                this.aiKingTower = new KingTower(w / 2, 50, 1500, 'ai', this);
+                this.aiLeftTower = new PrincessTower(w / 4, 150, 1000, 'ai', this);
+                this.aiRightTower = new PrincessTower(w * 3 / 4, 150, 1000, 'ai', this);
+                
+                this.aiTrainer = TRAINER_LIST[Math.floor(Math.random() * TRAINER_LIST.length)];
+                
+                this.playerElixir = 5;
+                this.aiElixir = 5;
+                this.aiSpawnTimer = 4;
+                this.gameState = GAME_STATE.RUNNING;
+                this.lastTime = 0;
+                this.animationFrameId = null;
+                
+                this.playerFullDeck = shuffleArray(FULL_DECK_KEYS);
+                this.playerHand = [];
+                this.playerDeckQueue = [];
+                this.aiFullDeck = shuffleArray(FULL_DECK_KEYS);
+                this.aiHand = [];
+                this.aiDeckQueue = [];
+                
+                this.selectedCard = null; 
+                
+                // *** НОВИЙ КОД: Додано відстеження курсора ***
+                this.cursorPosition = { x: -100, y: -100 }; // Початкова позиція за екраном
+                this.isCursorOnCanvas = false;
+                // *** КІНЕЦЬ НОВОГО КОДУ ***
+            }
+            getTowers(team) {
+                if (team === 'player') return { king: this.playerKingTower, left: this.playerLeftTower, right: this.playerRightTower };
+                else return { king: this.aiKingTower, left: this.aiLeftTower, right: this.aiRightTower };
+            }
+            getAllTowers() {
+                return [this.playerKingTower, this.playerLeftTower, this.playerRightTower, this.aiKingTower, this.aiLeftTower, this.aiRightTower];
+            }
+            addProjectile(projectile) { this.projectiles.push(projectile); }
+            addEffect(effect) { this.effects.push(effect); } 
+
+            initDecks() {
+                this.playerHand = this.playerFullDeck.slice(0, 4);
+                this.playerDeckQueue = this.playerFullDeck.slice(4, 8);
+                this.aiHand = this.aiFullDeck.slice(0, 4);
+                this.aiDeckQueue = this.aiFullDeck.slice(4, 8);
+                this.updateCardHandUI();
+            }
+            
+            rotateDeck(team, playedCardIndex) {
+                const hand = (team === 'player') ? this.playerHand : this.aiHand;
+                const queue = (team === 'player') ? this.playerDeckQueue : this.aiDeckQueue;
+                
+                const playedCardKey = hand.splice(playedCardIndex, 1)[0];
+                const nextCardKey = queue.shift();
+                
+                hand.push(nextCardKey);
+                queue.push(playedCardKey);
+            }
+
+            selectCard(index) {
+                const cardKey = this.playerHand[index];
+                if (!cardKey) return;
+                const card = CARD_DECK[cardKey];
+                if (this.playerElixir >= card.cost) {
+                    if (this.selectedCard) {
+                        const oldCardEl = document.querySelector(`.card[data-index='${this.selectedCard.index}']`);
+                        if (oldCardEl) oldCardEl.classList.remove('selected');
+                    }
+                    this.selectedCard = { index: index, key: cardKey, cost: card.cost, type: card.type };
+                    const newCardEl = document.querySelector(`.card[data-index='${index}']`);
+                    if (newCardEl) newCardEl.classList.add('selected');
+                }
+            }
+            
+            // *** ПОЧАТОК ЗМІНИ: Оновлено handleCanvasClick ***
+            handleCanvasClick(e) {
+                if (!this.selectedCard || this.gameState !== GAME_STATE.RUNNING) return;
+                
+                const x = e.clientX - canvasRect.left;
+                const y = e.clientY - canvasRect.top;
+                
+                // Використовуємо нову, складнішу перевірку
+                const cardType = this.selectedCard.type;
+                if (!this.isDeploymentAllowed(x, y, cardType)) {
+                    console.log("Неприпустиме місце розміщення!");
+                    return; // Забороняємо розміщення
+                }
+                
+                // Якщо перевірка пройдена, розміщуємо карту
+                this.spawnCard(this.selectedCard.key, 'player', x, y);
+                this.playerElixir -= this.selectedCard.cost;
+                
+                this.rotateDeck('player', this.selectedCard.index); 
+                
+                this.selectedCard = null;
+                this.updateCardHandUI();
+            }
+            // *** КІНЕЦЬ ЗМІНИ ***
+            
+            spawnArrows(x, y, team) {
+                this.addEffect(new ArrowRain(x, y, CARD_DECK.arrows.stats.range * 25)); // 4 * 25 = 100
+                const damage = CARD_DECK.arrows.stats.damage;
+                const aoeRadius = CARD_DECK.arrows.stats.range * 25; 
+                
+                const allEntities = [...this.entities, ...this.getAllTowers()];
+                for (const entity of allEntities) {
+                    if (entity.team !== team && entity.isAlive) {
+                        const distance = getDistance({x: x, y: y}, entity);
+                        if (distance <= aoeRadius) {
+                            entity.takeDamage(damage);
+                        }
+                    }
+                }
+            }
+            
+            spawnCard(cardKey, team, x, y) {
+                const base = (team === 'player') ? this.playerKingTower : this.aiKingTower;
+                switch (cardKey) {
+                    case 'knight':
+                        this.entities.push(new Knight(x, y, team));
+                        break;
+                    case 'archers': 
+                        this.entities.push(new Archer(x - 10, y, team, this));
+                        this.entities.push(new Archer(x + 10, y + 5, team, this)); 
+                        break;
+                    case 'giant':
+                        this.entities.push(new Giant(x, y, team));
+                        break;
+                    case 'wizard':
+                        this.entities.push(new Wizard(x, y, team, this));
+                        break;
+                    case 'goblin':
+                        this.entities.push(new Goblin(x, y, team));
+                        break;
+                    case 'minipekka':
+                        this.entities.push(new MiniPekka(x, y, team));
+                        break;
+                    case 'fireball':
+                        const fbSpawnX = (team === 'player') ? base.x : base.x;
+                        const fbSpawnY = (team === 'player') ? base.y - 50 : base.y + 50;
+                        this.addProjectile(new Fireball(fbSpawnX, fbSpawnY, x, y, CARD_DECK.fireball.stats.damage, team, this));
+                        break;
+                    case 'arrows':
+                        this.spawnArrows(x, y, team);
+                        break;
+                }
+            }
+            
+            runAI(deltaTime) {
+                this.aiSpawnTimer -= deltaTime;
+                if (this.aiSpawnTimer <= 0) {
+                    this.aiSpawnTimer = Math.random() * 3 + 4; 
+                    let cardToPlay = null;
+                    let cardIndex = -1;
+                    
+                    for (let i = 0; i < this.aiHand.length; i++) {
+                        const key = this.aiHand[i];
+                        if (this.aiElixir >= CARD_DECK[key].cost) {
+                            cardToPlay = key;
+                            cardIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    if (cardToPlay) {
+                        this.aiElixir -= CARD_DECK[cardToPlay].cost;
+                        // AI розміщує юнітів лише на своїй (верхній) половині
+                        const spawnX = Math.random() < 0.5 ? (canvas.width / 4) : (canvas.width * 3 / 4);
+                        const spawnY = 150 + (Math.random() * 50); // Зона AI
+                        
+                        // AI розміщує закляття на стороні гравця
+                        const cardType = CARD_DECK[cardToPlay].type;
+                        let finalSpawnX = spawnX;
+                        let finalSpawnY = spawnY;
+                        
+                        if(cardType === 'spell') {
+                            finalSpawnX = Math.random() < 0.5 ? (canvas.width / 4) : (canvas.width * 3 / 4);
+                            finalSpawnY = canvas.height - 150 - (Math.random() * 50); // Зона гравця
+                        }
+                        
+                        this.spawnCard(cardToPlay, 'ai', finalSpawnX, finalSpawnY);
+                        
+                        this.rotateDeck('ai', cardIndex); 
+                    }
+                }
+            }
+            
+            updateCardHandUI() {
+                // 1. Update Hand
+                cardHandContainer.innerHTML = ''; 
+                this.playerHand.forEach((cardKey, index) => {
+                    if (!cardKey) return; 
+                    const card = CARD_DECK[cardKey];
+                    const cardEl = document.createElement('div');
+                    cardEl.className = 'card';
+                    cardEl.dataset.index = index;
+                    if (this.playerElixir < card.cost) cardEl.classList.add('disabled');
+                    
+                    cardEl.innerHTML = `
+                        <div class="card-cost">${card.cost}</div>
+                        <div class="card-image">${CARD_SVG_GRAPHICS[cardKey] || ''}</div>
+                        <div class="card-name">${card.name}</div>
+                    `;
+                    cardEl.addEventListener('click', () => this.selectCard(index));
+                    cardHandContainer.appendChild(cardEl);
+                });
+                
+                // 2. Update "Next" card preview
+                const nextCardKey = this.playerDeckQueue[0];
+                if (nextCardKey) {
+                    const card = CARD_DECK[nextCardKey];
+                    nextCardPreview.innerHTML = `
+                        <div class="card-cost">${card.cost}</div>
+                        <div class="next-card-image">${CARD_SVG_GRAPHICS[nextCardKey] || ''}</div>
+                        <div class="card-name">${card.name}</div>
+                    `;
+                } else {
+                    nextCardPreview.innerHTML = ''; 
+                }
+
+                // 3. Reselect card if still valid
+                if (this.selectedCard && this.playerHand[this.selectedCard.index] === this.selectedCard.key) {
+                    const el = document.querySelector(`.card[data-index='${this.selectedCard.index}']`);
+                    if (el && !el.classList.contains('disabled')) el.classList.add('selected');
+                } else {
+                    this.selectedCard = null;
+                }
+            }
+            
+            update(deltaTime) {
+                if (this.gameState !== GAME_STATE.RUNNING) return;
+                this.playerElixir = Math.min(ELIXIR_MAX, this.playerElixir + ELIXIR_REGEN_RATE * deltaTime);
+                this.aiElixir = Math.min(ELIXIR_MAX, this.aiElixir + ELIXIR_REGEN_RATE * deltaTime);
+                this.runAI(deltaTime);
+                
+                this.getAllTowers().forEach(t => t.update(deltaTime, this));
+                [...this.entities].forEach(e => e.update(deltaTime, this));
+                [...this.projectiles].forEach(p => p.update(deltaTime));
+                [...this.effects].forEach(e => e.update(deltaTime)); 
+                
+                this.entities = this.entities.filter(e => e.isAlive);
+                this.projectiles = this.projectiles.filter(p => p.isAlive);
+                this.effects = this.effects.filter(e => e.isAlive); 
+                
+                if (!this.playerKingTower.isAlive) {
+                    this.gameState = GAME_STATE.AI_WINS;
+                    messageText.innerText = 'YOU LOSE!';
+                    message.classList.remove('hidden');
+                } else if (!this.aiKingTower.isAlive) {
+                    this.gameState = GAME_STATE.PLAYER_WINS;
+                    messageText.innerText = 'YOU WIN!';
+                    message.classList.remove('hidden');
+                }
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const w = canvas.width;
+                const h = canvas.height;
+                const midY = h / 2;
+                
+                // 1. Draw checkerboard background
+                const tileSize = 40; 
+                const lightGreen = '#6aa84f';
+                const darkGreen = '#5a943f';
+                for (let r = 0; r * tileSize < h; r++) {
+                    for (let c = 0; c * tileSize < w; c++) {
+                        ctx.fillStyle = ((r + c) % 2 === 0) ? lightGreen : darkGreen;
+                        ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
+                    }
+                }
+                
+                // 2. *** Draw Paths with 90-degree angles (Final Version) ***
+                ctx.strokeStyle = '#d2b48c'; // Sand color
+                ctx.lineWidth = 10;
+                ctx.lineCap = 'butt'; 
+                
+                const aiKing = {x: this.aiKingTower.x, y: this.aiKingTower.y};
+                const aiLeft = {x: this.aiLeftTower.x, y: this.aiLeftTower.y};
+                const aiRight = {x: this.aiRightTower.x, y: this.aiRightTower.y};
+                const playerKing = {x: this.playerKingTower.x, y: this.playerKingTower.y};
+                const playerLeft = {x: this.playerLeftTower.x, y: this.playerLeftTower.y};
+                const playerRight = {x: this.playerRightTower.x, y: this.playerRightTower.y};
+                const leftBridge = {x: w / 4, y: midY};
+                const rightBridge = {x: w * 3 / 4, y: midY};
+                
+                ctx.beginPath();
+                
+                // AI Paths (Main lanes - 90 deg)
+                ctx.moveTo(leftBridge.x, leftBridge.y - 25);
+                ctx.lineTo(aiLeft.x, aiLeft.y);
+                ctx.moveTo(rightBridge.x, rightBridge.y - 25);
+                ctx.lineTo(aiRight.x, aiRight.y);
+                
+                // AI 90-degree paths to King Tower
+                ctx.moveTo(aiKing.x - 25, aiKing.y + 25); 
+                ctx.lineTo(aiKing.x - 25, aiLeft.y);      
+                ctx.lineTo(aiLeft.x, aiLeft.y);           
+                
+                ctx.moveTo(aiKing.x + 25, aiKing.y + 25); 
+                ctx.lineTo(aiKing.x + 25, aiRight.y);     
+                ctx.lineTo(aiRight.x, aiRight.y);         
+
+
+                // Player Paths (Main lanes - 90 deg)
+                ctx.moveTo(leftBridge.x, leftBridge.y + 25);
+                ctx.lineTo(playerLeft.x, playerLeft.y);
+                ctx.moveTo(rightBridge.x, rightBridge.y + 25);
+                ctx.lineTo(playerRight.x, playerRight.y);
+
+                // Player 90-degree paths to King Tower
+                ctx.moveTo(playerKing.x - 25, playerKing.y - 25); 
+                ctx.lineTo(playerKing.x - 25, playerLeft.y);      
+                ctx.lineTo(playerLeft.x, playerLeft.y);           
+
+                ctx.moveTo(playerKing.x + 25, playerKing.y - 25); 
+                ctx.lineTo(playerKing.x + 25, playerRight.y);     
+                ctx.lineTo(playerRight.x, playerRight.y);         
+                
+                ctx.stroke();
+                ctx.lineCap = 'round'; 
+
+                
+                // 3. River
+                ctx.fillStyle = '#3b82f6'; // Blue
+                ctx.fillRect(0, midY - 20, w, 40);
+                
+                // 4. Bridges
+                ctx.fillStyle = '#854d0e'; // Brown
+                ctx.fillRect(w / 4 - 25, midY - 25, 50, 50);
+                ctx.fillRect(w * 3 / 4 - 25, midY - 25, 50, 50);
+                
+                // 5. Deployment Zones (Тепер малюється лише пунктирна лінія ріки)
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.setLineDash([5, 10]);
+                ctx.beginPath();
+                ctx.moveTo(0, midY);
+                ctx.lineTo(w, midY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // --- Draw all towers and units ---
+                this.getAllTowers().forEach(t => t.draw(this.ctx));
+                this.entities.forEach(e => e.draw(this.ctx));
+                this.projectiles.forEach(p => p.draw(this.ctx));
+                this.effects.forEach(e => e.draw(this.ctx)); 
+                
+                // *** НОВИЙ КОД: Малюємо індикатор розміщення ***
+                this.drawPlacementIndicator(this.ctx);
+                // *** КІНЕЦЬ НОВОГО КОДУ ***
+
+                // --- Update UI ---
+                elixirBar.style.width = `${(this.playerElixir / ELIXIR_MAX) * 100}%`;
+                elixirText.innerText = `${Math.floor(this.playerElixir)} / ${ELIXIR_MAX}`;
+                
+                document.querySelectorAll('.card').forEach(el => {
+                    const cardKey = this.playerHand[el.dataset.index];
+                    if (cardKey && this.playerElixir < CARD_DECK[cardKey].cost) {
+                        el.classList.add('disabled');
+                        if (el.classList.contains('selected')) {
+                            el.classList.remove('selected');
+                            this.selectedCard = null;
+                        }
+                    } else if (el.classList.contains('disabled')) {
+                        el.classList.remove('disabled');
+                    }
+                });
+            }
+
+            // The main game loop
+            gameLoop(timestamp) {
+                if (!this.animationFrameId) return;
+                const deltaTime = (timestamp - this.lastTime) / 1000;
+                this.lastTime = timestamp;
+                if (this.gameState === GAME_STATE.RUNNING) {
+                    this.update(deltaTime || 0);
+                }
+                this.draw();
+                this.animationFrameId = requestAnimationFrame(this.gameLoop.bind(this));
+            }
+
+            start() {
+                this.initDecks(); 
+                canvas.addEventListener('click', this.handleCanvasClick.bind(this));
+                
+                // *** НОВИЙ КОД: Додано слухачі миші ***
+                canvas.addEventListener('mousemove', this.handleCanvasMove.bind(this));
+                canvas.addEventListener('mouseleave', this.handleCanvasLeave.bind(this));
+                // *** КІНЕЦЬ НОВОГО КОДУ ***
+
+                this.lastTime = performance.now();
+                this.animationFrameId = requestAnimationFrame(this.gameLoop.bind(this));
+            }
+            
+            stopGame() {
+                if (this.animationFrameId) {
+                    cancelAnimationFrame(this.animationFrameId);
+                    this.animationFrameId = null;
+                }
+                
+                // *** НОВИЙ КОД: Потрібно також видалити слухачі, щоб уникнути дублікатів ***
+                // (Хоча в цьому простому прикладі це не критично, але це гарна практика)
+                // canvas.removeEventListener('click', ...);
+                // canvas.removeEventListener('mousemove', ...);
+                // canvas.removeEventListener('mouseleave', ...);
+            }
+            
+            // *** ПОЧАТОК НОВОГО КОДУ: Функція перевірки зони розміщення ***
+            isDeploymentAllowed(x, y, cardType) {
+                const w = canvas.width;
+                const h = canvas.height;
+                const midY = h / 2;
+
+                // 1. Закляття можна розміщувати будь-де
+                if (cardType === 'spell') {
+                    return true;
+                }
+
+                // 2. Перевірка для Юнітів
+                // Власна половина (нижня) завжди дозволена
+                if (y > midY) {
+                    return true;
+                }
+
+                // Якщо ми на половині ворога (y <= midY)
+                const aiLeftDestroyed = !this.aiLeftTower.isAlive;
+                const aiRightDestroyed = !this.aiRightTower.isAlive;
+                
+                const inLeftLane = (x < w / 2);
+                
+                // Перевірка розширення лівої смуги
+                if (inLeftLane && aiLeftDestroyed) {
+                    return true;
+                }
+                
+                // Перевірка розширення правої смуги
+                if (!inLeftLane && aiRightDestroyed) { // !inLeftLane означає "в правій смузі"
+                    return true;
+                }
+
+                // Якщо жодна з умов не виконана, це заборонена ворожа територія
+                return false;
+            }
+            // *** КІНЕЦЬ НОВОГО КОДУ ***
+
+
+            // *** НОВИЙ КОД: Обробники руху миші та малювання індикатора ***
+            handleCanvasMove(e) {
+                this.isCursorOnCanvas = true;
+                // Використовуємо 'canvasRect' з глобальної області
+                if (canvasRect) { // Перевірка, що canvasRect вже визначено
+                    this.cursorPosition.x = e.clientX - canvasRect.left;
+                    this.cursorPosition.y = e.clientY - canvasRect.top;
+                }
+            }
+
+            handleCanvasLeave(e) {
+                this.isCursorOnCanvas = false;
+            }
+
+            // *** ПОЧАТОК ЗМІНИ: Оновлено drawPlacementIndicator ***
+            drawPlacementIndicator(ctx) {
+                // Нічого не малюємо, якщо карта не обрана або курсор за межами поля
+                if (!this.selectedCard || !this.isCursorOnCanvas) {
+                    return; 
+                }
+
+                const cardKey = this.selectedCard.key;
+                const card = CARD_DECK[cardKey];
+                if (!card) return; 
+                
+                const x = this.cursorPosition.x;
+                const y = this.cursorPosition.y;
+
+                // --- 1. Малюємо радіус для ЗАКЛЯТЬ ---
+                if (card.type === 'spell') {
+                    let radiusInPixels = 0;
+                    
+                    if (cardKey === 'fireball') {
+                        radiusInPixels = card.stats.range * 24; // 2.5 * 24 = 60px
+                    } else if (cardKey === 'arrows') {
+                        radiusInPixels = card.stats.range * 25; // 4 * 25 = 100px
+                    }
+                    
+                    if (radiusInPixels > 0) {
+                        ctx.globalAlpha = 0.4;
+                        ctx.fillStyle = 'white';
+                        ctx.beginPath();
+                        ctx.arc(x, y, radiusInPixels, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        ctx.globalAlpha = 1.0;
+                        ctx.strokeStyle = 'white';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(x, y, radiusInPixels, 0, Math.PI * 2);
+                        ctx.stroke();
+
+                        ctx.font = 'bold 20px Inter, sans-serif';
+                        ctx.fillStyle = 'white';
+                        ctx.textAlign = 'center';
+                        ctx.shadowColor = 'black';
+                        ctx.shadowBlur = 5;
+                        ctx.fillText(card.name.toUpperCase(), x, y - radiusInPixels - 15);
+                        ctx.shadowColor = 'transparent';
+                        ctx.shadowBlur = 0;
+                    }
+                } 
+                // --- 2. Малюємо індикацію для ЮНІТІВ (з червоними зонами) ---
+                else if (card.type === 'unit') {
+                    
+                    // 1. Перевіряємо, чи можна ставити в поточному місці
+                    const isCurrentSpotAllowed = this.isDeploymentAllowed(x, y, card.type);
+
+                    // 2. Встановлюємо колір для маленького квадрата: білий - можна, червоний - не можна
+                    const color = isCurrentSpotAllowed ? 'white' : '#ef4444';
+                    
+                    ctx.globalAlpha = 0.7;
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    
+                    // 3. Малюємо квадратну "клітинку" під курсором
+                    const tileWidth = 40; 
+                    const tileHeight = 40;
+                    ctx.strokeRect(x - tileWidth / 2, y - tileHeight / 2, tileWidth, tileHeight);
+                    
+                    // 4. Якщо курсор над ЗАБОРОНЕНОЮ зоною, показати ВСІ заборонені зони
+                    if (!isCurrentSpotAllowed) {
+                        const w = canvas.width;
+                        const h = canvas.height;
+                        const midY = h / 2;
+                        const aiLeftDestroyed = !this.aiLeftTower.isAlive;
+                        const aiRightDestroyed = !this.aiRightTower.isAlive;
+
+                        ctx.fillStyle = 'rgba(239, 68, 68, 0.4)'; // Напівпрозорий червоний
+
+                        // Малюємо червоний квадрат на лівій смузі, якщо вежа ще стоїть
+                        if (!aiLeftDestroyed) {
+                            ctx.fillRect(0, 0, w / 2, midY);
+                        }
+                        
+                        // Малюємо червоний квадрат на правій смузі, якщо вежа ще стоїть
+                        if (!aiRightDestroyed) {
+                            ctx.fillRect(w / 2, 0, w / 2, midY);
+                        }
+                    }
+                    
+                    ctx.globalAlpha = 1.0;
+                }
+            }
+            // *** КІНЕЦЬ ЗМІНИ ***
+        }
+        
+        // --- Init App ---
+        switchTab('battle'); // Start on battle tab
+        initCardCollectionUI();
+        initShopUI();
+        
+    </script>
+</body>
+</html>
