@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clash Arena 10.0 (Final Deck)</title> <!-- Оновлено версію -->
+    <title>Clash Arena 10.1 (Splash & Air)</title> <!-- Оновлено версію -->
     <!-- 1. Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -1103,6 +1103,11 @@
                         <div class="label">⏳ Lifetime</div>
                         <div class="value" id="popup-card-lifetime">30s</div>
                     </div>
+                    <!-- NEW: Stat box for Transport -->
+                    <div class="popup-stat-box" id="stat-transport">
+                        <div class="label">✈️ Transport</div>
+                        <div class="value" id="popup-card-transport">Ground</div>
+                    </div>
                 </div>
                 
                 <!-- === NEW: Deck Button === -->
@@ -1469,82 +1474,83 @@
         };
 
         // ** NEW: Card Deck from user's latest table (17 Cards) **
+        // ** ДОДАНО: 'transport' до кожної картки, де це необхідно **
         const CARD_DECK = {
             'knight':    { 
                 name: 'Knight', emoji: '🛡️', cost: 3, type: 'unit',
-                rarity: 'Common', targets: 'Ground',
+                rarity: 'Common', targets: 'Ground', transport: 'Ground', // Додано
                 stats: { hp: 1766, damage: 202, attackSpeed: 1/1.2, range: 1.2, speed: 'Medium' },
                 description: 'A tough melee fighter. Not tiny, not giant, just right.'
             },
             'archers':   { 
                 name: 'Archers', emoji: '🏹', cost: 3, type: 'unit',
-                rarity: 'Common', targets: 'Air & Ground',
+                rarity: 'Common', targets: 'Air & Ground', transport: 'Ground', // Додано
                 stats: { hp: 304, damage: 112, attackSpeed: 1/0.9, range: 5, speed: 'Medium' },
                 description: 'A pair of lightly-armored ranged attackers. They help cover the sky.'
             },
             'giant':     { 
                 name: 'Giant', emoji: '👹', cost: 5, type: 'unit',
-                rarity: 'Rare', targets: 'Buildings',
+                rarity: 'Rare', targets: 'Buildings', transport: 'Ground', // Додано
                 stats: { hp: 4090, damage: 253, attackSpeed: 1/1.5, range: 1.2, speed: 'Slow' },
                 description: 'Slow but durable, only attacks buildings. A real wrecking ball!'
             },
             'wizard':    { 
                 name: 'Wizard', emoji: '🧙', cost: 5, type: 'unit',
-                rarity: 'Rare', targets: 'Air & Ground',
+                rarity: 'Rare', targets: 'Air & Ground', transport: 'Ground', // Додано
                 stats: { hp: 755, damage: 281, attackSpeed: 1/1.4, range: 5.5, speed: 'Medium' },
                 description: 'The most wonderful unit in the arena, casting powerful area damage spells.'
             },
             'goblins':    { 
                 name: 'Goblins', emoji: '🟢', cost: 2, type: 'unit',
-                rarity: 'Common', targets: 'Ground',
+                rarity: 'Common', targets: 'Ground', transport: 'Ground', // Додано
                 stats: { hp: 202, damage: 120, attackSpeed: 1/1.1, range: 0.5, speed: 'Very Fast' },
                 description: 'Four fast, melee attackers. Small, fast, green, and mean!'
             },
             'miniPekka': { 
                 name: 'Mini P.E.K.K.A.', emoji: '🤖', cost: 4, type: 'unit',
-                rarity: 'Rare', targets: 'Ground',
+                rarity: 'Rare', targets: 'Ground', transport: 'Ground', // Додано
                 stats: { hp: 1433, damage: 755, attackSpeed: 1/1.6, range: 0.8, speed: 'Medium' },
                 description: 'Pancakes! Loves to destroy anything in its path with its mighty sword.'
             },
             'lavaHound': { 
                 name: 'Lava Hound', emoji: '🔥', cost: 7, type: 'unit',
-                rarity: 'Legendary', targets: 'Buildings',
+                rarity: 'Legendary', targets: 'Buildings', transport: 'Air', // ЗМІНЕНО
                 stats: { hp: 3581, damage: 53, attackSpeed: 1/1.3, range: 3.5, speed: 'Slow' },
                 description: 'The Lava Hound is a majestic flying beast that attacks buildings.'
             },
             'archerQueen': { 
                 name: 'Archer Queen', emoji: '👑', cost: 5, type: 'unit',
-                rarity: 'Champion', targets: 'Air & Ground',
+                rarity: 'Champion', targets: 'Air & Ground', transport: 'Ground', // Додано
                 stats: { hp: 1000, damage: 225, attackSpeed: 1/1.2, range: 5, speed: 'Medium' },
                 description: 'A fierce warrior who attacks from a distance.'
             },
             'musketeer': { 
                 name: 'Musketeer', emoji: '🎯', cost: 4, type: 'unit',
-                rarity: 'Rare', targets: 'Air & Ground',
+                rarity: 'Rare', targets: 'Air & Ground', transport: 'Ground', // Додано
                 stats: { hp: 721, damage: 217, attackSpeed: 1/1.0, range: 6, speed: 'Medium' },
                 description: 'Don\'t be fooled by her delicately coiffed hair; the Musketeer is a mean shot.'
             },
             'valkyrie':  { 
                 name: 'Valkyrie', emoji: '🪓', cost: 4, type: 'unit',
-                rarity: 'Rare', targets: 'Ground',
+                rarity: 'Rare', targets: 'Ground', transport: 'Ground', // Додано
                 stats: { hp: 1907, damage: 266, attackSpeed: 1/1.5, range: 1.2, speed: 'Medium' },
                 description: 'Tough melee fighter, deals area damage around her.'
             },
             'hogRider':  { 
                 name: 'Hog Rider', emoji: '🔨', cost: 4, type: 'unit',
-                rarity: 'Rare', targets: 'Buildings',
+                rarity: 'Rare', targets: 'Buildings', transport: 'Ground', // Додано
                 stats: { hp: 1697, damage: 317, attackSpeed: 1/1.6, range: 0.8, speed: 'Very Fast' },
                 description: 'Fast melee troop that targets buildings.'
             },
             'skeletonArmy': { 
                 name: 'Skeleton Army', emoji: '💀', cost: 3, type: 'unit',
-                rarity: 'Epic', targets: 'Ground',
+                rarity: 'Epic', targets: 'Ground', transport: 'Ground', // Додано
                 stats: { hp: 81, damage: 81, attackSpeed: 1/1.1, range: 0.5, speed: 'Medium' },
                 description: 'Spawns an army of Skeletons. Meet Larry and his friends.'
             },
             'minions': { 
                 name: 'Minions', emoji: '🦇', cost: 3, type: 'unit',
-                rarity: 'Common', targets: 'Air & Ground',
+                rarity: 'Common', targets: 'Air & Ground', transport: 'Air', // ЗМІНЕНО
                 stats: { hp: 230, damage: 107, attackSpeed: 1/1.1, range: 2.5, speed: 'Fast' },
                 description: 'Three fast, unarmored flying attackers.'
             },
@@ -1568,7 +1574,7 @@
             },
             'cannon':    { 
                 name: 'Cannon', emoji: '💣', cost: 3, type: 'building',
-                rarity: 'Common', targets: 'Ground',
+                rarity: 'Common', targets: 'Ground', transport: 'Ground', // Додано
                 stats: { hp: 824, damage: 212, attackSpeed: 1/1.0, range: 5.5, lifetime: 30 },
                 description: 'Defensive building. Shoots cannonballs at ground troops.'
             }
@@ -1621,7 +1627,7 @@
                 cardEl.innerHTML = `
                     <div class="card-cost">${card.cost}</div>
                     <div class="card-image">${CARD_SVG_GRAPHICS[cardKey] || ''}</div>
-                    <div class="card-name">${card.name}</div>
+                    <div class.card-name">${card.name}</div>
                 `;
                 // Add click listener to show stats (and allow removal)
                 cardEl.addEventListener('click', () => showCardStats(cardKey));
@@ -1669,7 +1675,8 @@
         const statBoxRange = document.getElementById('stat-range');
         const statBoxAttackSpeed = document.getElementById('stat-attack-speed');
         const statBoxTargets = document.getElementById('stat-targets');
-        const statBoxLifetime = document.getElementById('stat-lifetime'); // NEW
+        const statBoxLifetime = document.getElementById('stat-lifetime');
+        const statBoxTransport = document.getElementById('stat-transport'); // NEW
         
         // Stat values
         const popupCardHp = document.getElementById('popup-card-hp');
@@ -1678,7 +1685,8 @@
         const popupCardRange = document.getElementById('popup-card-range');
         const popupCardAttackSpeed = document.getElementById('popup-card-attack-speed');
         const popupCardTargets = document.getElementById('popup-card-targets');
-        const popupCardLifetime = document.getElementById('popup-card-lifetime'); // NEW
+        const popupCardLifetime = document.getElementById('popup-card-lifetime');
+        const popupCardTransport = document.getElementById('popup-card-transport'); // NEW
 
         function showCardStats(cardKey) {
             const card = CARD_DECK[cardKey];
@@ -1693,7 +1701,7 @@
             popupCardPreview.innerHTML = `
                 <div class="card-cost">${card.cost}</div>
                 <div class="card-image">${CARD_SVG_GRAPHICS[cardKey] || ''}</div>
-                <div class="card-name">${card.name}</div>
+                <div class.card-name">${card.name}</div>
             `;
             popupCardName.innerText = card.name;
             popupCardRarity.innerText = card.rarity;
@@ -1755,6 +1763,14 @@
                 statBoxLifetime.classList.remove('hidden');
             } else {
                 statBoxLifetime.classList.add('hidden');
+            }
+            
+            // NEW: Show Transport
+            if (card.transport) {
+                popupCardTransport.innerText = card.transport;
+                statBoxTransport.classList.remove('hidden');
+            } else {
+                statBoxTransport.classList.add('hidden');
             }
             
             // === NEW: Deck Button Logic ===
@@ -1838,7 +1854,7 @@
                 cardEl.innerHTML = `
                     <div class="card-cost">${card.cost}</div>
                     <div class="card-image">${CARD_SVG_GRAPHICS[cardKey] || ''}</div>
-                    <div class="card-name">${card.name}</div>
+                    <div class.card-name">${card.name}</div>
                 `;
                 // **NEW: Add click listener**
                 cardEl.addEventListener('click', () => showCardStats(cardKey));
@@ -2068,25 +2084,38 @@
                 this.isAlive = true;
                 this.emoji = '❓';
                 this.fontSize = 30; 
+                this.transport = 'Ground'; // NEW: Default transport
             }
             draw(ctx) {
                 if (!this.isAlive) return; 
                 
+                // NEW: Make flying units "float"
+                let drawY = this.y;
+                if (this.transport === 'Air') {
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillStyle = '#111';
+                    ctx.beginPath();
+                    ctx.ellipse(this.x, this.y + this.height / 2, this.width / 2, this.width / 4);
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0;
+                    drawY -= 10; // Draw them slightly higher
+                }
+                
                 ctx.font = `${this.fontSize}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(this.emoji, this.x, this.y);
-                this.drawHealthBar(ctx);
+                ctx.fillText(this.emoji, this.x, drawY);
+                this.drawHealthBar(ctx, drawY); // Pass drawY
             }
-            drawHealthBar(ctx) {
+            drawHealthBar(ctx, drawY) { // Added drawY
                 const barWidth = this.width;
                 const barHeight = 5;
                 const yOffset = this.height / 2;
                 ctx.fillStyle = '#7f1d1d'; 
-                ctx.fillRect(this.x - barWidth / 2, this.y + yOffset, barWidth, barHeight);
+                ctx.fillRect(this.x - barWidth / 2, drawY + yOffset, barWidth, barHeight);
                 const healthPercent = this.health / this.maxHealth;
                 ctx.fillStyle = this.team === 'player' ? '#22c55e' : '#ef4444'; 
-                ctx.fillRect(this.x - barWidth / 2, this.y + yOffset, barWidth * healthPercent, barHeight);
+                ctx.fillRect(this.x - barWidth / 2, drawY + yOffset, barWidth * healthPercent, barHeight);
             }
             takeDamage(amount) {
                 this.health -= amount;
@@ -2132,6 +2161,25 @@
                 ctx.globalAlpha = (this.lifetime / 0.5);
                 ctx.font = '40px Arial';
                 ctx.fillText('💥', this.x, this.y);
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        // NEW: Valkyrie spin effect
+        class SpinEffect extends Effect {
+            constructor(x, y, radius) {
+                super(x, y, 0.3); // 0.3 second lifetime
+                this.radius = radius;
+            }
+            draw(ctx) {
+                const alpha = this.lifetime / 0.3;
+                ctx.globalAlpha = alpha;
+                ctx.strokeStyle = '#fef08a';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                // Radius expands outwards
+                ctx.arc(this.x, this.y, this.radius * (1 - alpha), 0, Math.PI * 2);
+                ctx.stroke();
                 ctx.globalAlpha = 1;
             }
         }
@@ -2183,6 +2231,8 @@
                 // NEW: Building lifetime
                 this.isBuilding = false;
                 this.lifetime = null;
+                this.transport = 'Ground'; // Towers are on the ground
+                this.targetType = 'Air & Ground'; // Princess/King towers
             }
 
             draw(ctx) {
@@ -2212,7 +2262,7 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText(this.emoji, this.x, this.y);
                 
-                this.drawHealthBar(ctx);
+                this.drawHealthBar(ctx, this.y); // Pass base Y
             }
 
             update(deltaTime, game) {
@@ -2257,6 +2307,12 @@
 
                 for (const entity of allEntities) {
                     if (entity.team !== this.team && entity.isAlive) {
+                        
+                        // NEW: Targeting logic
+                        if (this.targetType === 'Ground' && entity.transport === 'Air') {
+                            continue; // Can't attack air
+                        }
+                        
                         const distance = getDistance(this, entity);
                         if (distance < minDistance) {
                             minDistance = distance;
@@ -2279,6 +2335,7 @@
                 this.width = 50; 
                 this.height = 50;
                 this.isKing = true;
+                this.targetType = 'Air & Ground';
             }
         }
         
@@ -2288,6 +2345,7 @@
                 this.emoji = '🏹'; 
                 this.fontSize = 30; 
                 this.isKing = false;
+                this.targetType = 'Air & Ground';
             }
         }
         
@@ -2301,6 +2359,7 @@
                 this.isKing = false;
                 this.isBuilding = true; // Mark as building
                 this.lifetime = stats.lifetime;
+                this.targetType = 'Ground'; // NEW: Cannon targets ground
                 
                 // Set stats from deck
                 this.attackRange = stats.range * 25; // 5.5 * 25 = 137.5
@@ -2310,23 +2369,7 @@
                 this.attackDamage = stats.damage;
             }
             
-            // Cannon only targets ground
-            findTarget(allEntities) {
-                let closestTarget = null; 
-                let minDistance = this.attackRange;
-
-                for (const entity of allEntities) {
-                    // FIXME: Add check for ground-only
-                    if (entity.team !== this.team && entity.isAlive) {
-                        const distance = getDistance(this, entity);
-                        if (distance < minDistance) {
-                            minDistance = distance;
-                            closestTarget = entity;
-                        }
-                    }
-                }
-                this.target = closestTarget;
-            }
+            // Cannon only targets ground (findTarget is inherited from Tower, which now respects this.targetType)
             
             attack() {
                 this.game.addProjectile(new Projectile(this.x, this.y - this.height / 2, this.target, this.attackDamage, this.team, '⚫', 15));
@@ -2351,7 +2394,8 @@
 
 
         class Unit extends Entity {
-            constructor(x, y, width, height, health, team, speed, attackRange, attackDamage, attackSpeed, sightRange, attackWindup, targetType = 'Ground') {
+            // NEW: Added transport parameter
+            constructor(x, y, width, height, health, team, speed, attackRange, attackDamage, attackSpeed, sightRange, attackWindup, targetType = 'Ground', transport = 'Ground') {
                 super(x, y, width, height, health, team);
                 this.speed = speed;
                 this.attackRange = attackRange * 25; // Convert range to pixels (e.g., 1.2 * 25 = 30px)
@@ -2364,7 +2408,8 @@
                 this.attackTimer = 0; 
                 this.state = 'IDLE';
                 this.isAggroed = false; 
-                this.targetType = targetType; // NEW: 'Ground', 'Buildings', 'Air & Ground'
+                this.targetType = targetType; // 'Ground', 'Buildings', 'Air & Ground'
+                this.transport = transport; // 'Ground' or 'Air'
             }
             
             // ** AI LOGIC v7.1 (Critical Fix) **
@@ -2429,7 +2474,8 @@
             
             findTarget(game) {
                 const enemyTeam = this.team === 'player' ? 'ai' : 'player';
-                const enemyEntities = game.entities.filter(e => e.team === enemyTeam && e.isAlive);
+                // NEW: Get all enemy entities (units + towers)
+                const enemyEntities = [...game.entities, ...game.getAllTowers()].filter(e => e.team === enemyTeam && e.isAlive);
                 let closestTarget = null;
                 let minDistance = this.sightRange; 
                 
@@ -2437,19 +2483,43 @@
                 // 1. If this unit targets buildings...
                 if (this.targetType === 'Buildings') {
                     const enemyTowers = game.getTowers(enemyTeam);
-                    if (this.lane === 'left' && enemyTowers.left.isAlive) {
-                        this.target = enemyTowers.left;
-                    } else if (this.lane === 'right' && enemyTowers.right.isAlive) {
-                        this.target = enemyTowers.right;
+                    // NEW: Check transport. Air units can fly over river.
+                    if (this.transport === 'Air') {
+                        // Find closest tower
+                        let closestTower = null;
+                        let minTowerDist = Infinity;
+                        [enemyTowers.left, enemyTowers.right, enemyTowers.king].forEach(t => {
+                            if (t.isAlive) {
+                                const dist = getDistance(this, t);
+                                if (dist < minTowerDist) {
+                                    minTowerDist = dist;
+                                    closestTower = t;
+                                }
+                            }
+                        });
+                        this.target = closestTower;
                     } else {
-                        this.target = enemyTowers.king;
+                        // Ground unit targeting buildings (Giant, Hog)
+                        if (this.lane === 'left' && enemyTowers.left.isAlive) {
+                            this.target = enemyTowers.left;
+                        } else if (this.lane === 'right' && enemyTowers.right.isAlive) {
+                            this.target = enemyTowers.right;
+                        } else {
+                            this.target = enemyTowers.king;
+                        }
                     }
                     return; // Found target, exit
                 }
 
                 // 2. This unit targets Ground (or Air & Ground)
-                // (FIXME: We treat Air & Ground same as Ground for now)
                 for (const entity of enemyEntities) {
+                    // --- NEW TARGETING LOGIC ---
+                    // 1. Check if I can attack this entity's transport type
+                    if (this.targetType === 'Ground' && entity.transport === 'Air') {
+                        continue; // I target Ground, but entity is Air
+                    }
+                    // (If I target 'Air & Ground', I can hit both)
+                    
                     const distance = getDistance(this, entity);
                     if (distance < minDistance) {
                         minDistance = distance;
@@ -2467,12 +2537,29 @@
                 if (this.isAggroed || !this.target || !this.target.isAlive) {
                     this.isAggroed = false; 
                     const enemyTowers = game.getTowers(enemyTeam);
-                    if (this.lane === 'left' && enemyTowers.left.isAlive) {
-                        this.target = enemyTowers.left;
-                    } else if (this.lane === 'right' && enemyTowers.right.isAlive) {
-                        this.target = enemyTowers.right;
+                    // NEW: Flying units go straight to closest tower
+                    if (this.transport === 'Air') {
+                         let closestTower = null;
+                        let minTowerDist = Infinity;
+                        [enemyTowers.left, enemyTowers.right, enemyTowers.king].forEach(t => {
+                            if (t.isAlive) {
+                                const dist = getDistance(this, t);
+                                if (dist < minTowerDist) {
+                                    minTowerDist = dist;
+                                    closestTower = t;
+                                }
+                            }
+                        });
+                        this.target = closestTower;
                     } else {
-                        this.target = enemyTowers.king;
+                        // Ground units go to lane tower
+                        if (this.lane === 'left' && enemyTowers.left.isAlive) {
+                            this.target = enemyTowers.left;
+                        } else if (this.lane === 'right' && enemyTowers.right.isAlive) {
+                            this.target = enemyTowers.right;
+                        } else {
+                            this.target = enemyTowers.king;
+                        }
                     }
                 }
             }
@@ -2483,6 +2570,14 @@
                 const h = canvas.height;
                 const midY = h / 2;
                 let waypoint = { x: target.x, y: target.y };
+                
+                // NEW: Flying units move directly to target
+                if (this.transport === 'Air') {
+                    this.moveToWaypoint(deltaTime, waypoint);
+                    return;
+                }
+                
+                // Ground unit logic
                 const onMyStartingSide = (this.team === 'player' && this.y > midY) || (this.team === 'ai' && this.y < midY);
                 const targetOnMySide = (this.team === 'player' && target.y > midY) || (this.team === 'ai' && target.y < midY);
                 if (onMyStartingSide && !targetOnMySide) {
@@ -2512,7 +2607,7 @@
         class Knight extends Unit {
             constructor(x, y, team) {
                 const stats = CARD_DECK.knight.stats;
-                super(x, y, 30, 30, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 6, 0.4, 'Ground'); 
+                super(x, y, 30, 30, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 6, 0.4, 'Ground', 'Ground'); 
                 this.emoji = '🛡️';
                 this.fontSize = 30;
             }
@@ -2521,7 +2616,7 @@
         class Archer extends Unit {
             constructor(x, y, team, game) {
                 const stats = CARD_DECK.archers.stats;
-                super(x, y, 25, 25, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 7, 0.2, 'Air & Ground');
+                super(x, y, 25, 25, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 7, 0.2, 'Air & Ground', 'Ground');
                 this.game = game;
                 this.emoji = '🏹';
                 this.fontSize = 30;
@@ -2534,7 +2629,7 @@
         class Goblin extends Unit {
             constructor(x, y, team) {
                 const stats = CARD_DECK.goblins.stats;
-                super(x, y, 25, 25, stats.hp, team, 60, stats.range, stats.damage, stats.attackSpeed, 6, 0.3, 'Ground'); 
+                super(x, y, 25, 25, stats.hp, team, 60, stats.range, stats.damage, stats.attackSpeed, 6, 0.3, 'Ground', 'Ground'); 
                 this.emoji = '🟢';
                 this.fontSize = 25;
             }
@@ -2543,7 +2638,7 @@
         class MiniPekka extends Unit {
             constructor(x, y, team) {
                 const stats = CARD_DECK.miniPekka.stats;
-                super(x, y, 35, 35, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 6, 0.8, 'Ground'); 
+                super(x, y, 35, 35, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 6, 0.8, 'Ground', 'Ground'); 
                 this.emoji = '🤖';
                 this.fontSize = 35;
             }
@@ -2552,68 +2647,31 @@
         class Wizard extends Unit {
              constructor(x, y, team, game) {
                 const stats = CARD_DECK.wizard.stats;
-                super(x, y, 30, 30, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 7, 0.4, 'Air & Ground');
+                super(x, y, 30, 30, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 7, 0.4, 'Air & Ground', 'Ground');
                 this.game = game;
                 this.emoji = '🧙';
                 this.fontSize = 35;
+                this.splashRadius = 1.5 * 25; // NEW: Splash radius (1.5 tiles)
             }
             attack(target) {
-                // FIXME: Wizard should do splash damage. Using projectile for now.
-                this.game.addProjectile(new Projectile(this.x, this.y, target, this.attackDamage, this.team, '✨', 20));
+                // NEW: Use a projectile that splashes
+                this.game.addProjectile(new SplashProjectile(this.x, this.y, target, this.attackDamage, this.team, '✨', 20, this.splashRadius, this.game));
             }
         }
 
         class Giant extends Unit {
             constructor(x, y, team) {
                 const stats = CARD_DECK.giant.stats;
-                super(x, y, 40, 40, stats.hp, team, 25, stats.range, stats.damage, stats.attackSpeed, 7, 0.6, 'Buildings');
+                super(x, y, 40, 40, stats.hp, team, 25, stats.range, stats.damage, stats.attackSpeed, 7, 0.6, 'Buildings', 'Ground');
                 this.emoji = '👹';
                 this.fontSize = 40;
             }
             
-            // This unit only targets buildings
-            findTarget(game) {
-                const enemyTowers = game.getTowers(this.team === 'player' ? 'ai' : 'player');
-                if (this.lane === 'left' && enemyTowers.left.isAlive) this.target = enemyTowers.left;
-                else if (this.lane === 'right' && enemyTowers.right.isAlive) this.target = enemyTowers.right;
-                else this.target = enemyTowers.king;
-            }
+            // This unit only targets buildings (findTarget is inherited, logic is fixed there)
             
             update(deltaTime, game) {
-                if (!this.isAlive) return;
-                this.attackTimer -= deltaTime;
-                
-                if (!this.target || !this.target.isAlive) {
-                    this.findTarget(game);
-                }
-                if (!this.target) return; 
-                
-                const distance = getDistance(this, this.target);
-
-                if (this.state === 'ATTACKING') {
-                    if (this.attackTimer <= 0) { 
-                        if (this.target && this.target.isAlive && getDistance(this, this.target) <= this.attackRange) {
-                            this.attack(this.target);
-                        }
-                        this.attackTimer = this.attackCooldownTime;
-                        this.state = 'IDLE'; 
-                    }
-                } else if (this.state === 'IDLE') {
-                    if (distance <= this.attackRange) {
-                        if (this.attackTimer <= 0) { 
-                            this.state = 'ATTACKING';
-                            this.attackTimer = this.attackWindup; 
-                        }
-                    } else {
-                        this.state = 'MOVING'; 
-                    }
-                } else if (this.state === 'MOVING') {
-                    if (distance <= this.attackRange) {
-                        this.state = 'IDLE'; 
-                    } else {
-                        this.move(deltaTime, this.target); 
-                    }
-                }
+                 // Use the generic Unit update logic, it's now fixed
+                super.update(deltaTime, game);
             }
         }
         
@@ -2621,32 +2679,70 @@
         class LavaHound extends Unit {
             constructor(x, y, team, game) {
                 const stats = CARD_DECK.lavaHound.stats;
-                super(x, y, 40, 40, stats.hp, team, 25, stats.range, stats.damage, stats.attackSpeed, 7, 0.6, 'Buildings');
+                super(x, y, 40, 40, stats.hp, team, 25, stats.range, stats.damage, stats.attackSpeed, 7, 0.6, 'Buildings', 'Air'); // CHANGED
                 this.game = game;
                 this.emoji = '🔥';
                 this.fontSize = 40;
             }
             
-            findTarget(game) { // Copy from Giant
-                const enemyTowers = game.getTowers(this.team === 'player' ? 'ai' : 'player');
-                if (this.lane === 'left' && enemyTowers.left.isAlive) this.target = enemyTowers.left;
-                else if (this.lane === 'right' && enemyTowers.right.isAlive) this.target = enemyTowers.right;
-                else this.target = enemyTowers.king;
-            }
+            // findTarget is inherited, logic fixed in base Unit
             
-            update(deltaTime, game) { // Copy from Giant
+            update(deltaTime, game) { // Use base update
                 super.update(deltaTime, game);
             }
             
             attack(target) { // Ranged attack
                 this.game.addProjectile(new Projectile(this.x, this.y, target, this.attackDamage, this.team, '🔥', 15));
             }
+            
+            // NEW: Override takeDamage
+            takeDamage(amount) {
+                super.takeDamage(amount); // Call parent method
+                
+                if (!this.isAlive) {
+                    // It just died, spawn pups
+                    this.spawnPups();
+                }
+            }
+            
+            spawnPups() {
+                const numPups = 7; // As requested
+                for (let i = 0; i < numPups; i++) {
+                    const spawnX = this.x + (Math.random() - 0.5) * 40;
+                    const spawnY = this.y + (Math.random() - 0.5) * 40;
+                    this.game.entities.push(new LavaPup(spawnX, spawnY, this.team, this.game));
+                }
+            }
+        }
+        
+        // NEW: Lava Pup Class
+        class LavaPup extends Unit {
+             constructor(x, y, team, game) {
+                // Stats from user/wiki
+                const stats = {
+                    hp: 200, // Wiki value, user didn't provide (upping it a bit)
+                    damage: 81, // User value
+                    attackSpeed: 1/1.7, // User value
+                    range: 1.6, // User value
+                    speed: 'Medium' // User value
+                };
+                const speedValue = 40; // Medium
+                
+                super(x, y, 20, 20, stats.hp, team, speedValue, stats.range, stats.damage, stats.attackSpeed, 7, 0.4, 'Air & Ground', 'Air'); 
+                this.game = game;
+                this.emoji = '🐶'; // Close enough
+                this.fontSize = 20;
+            }
+            attack(target) {
+                // Ranged Melee attack
+                this.game.addProjectile(new Projectile(this.x, this.y, target, this.attackDamage, this.team, '🔥', 10));
+            }
         }
         
         class ArcherQueen extends Unit {
              constructor(x, y, team, game) {
                 const stats = CARD_DECK.archerQueen.stats;
-                super(x, y, 30, 30, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 7, 0.2, 'Air & Ground');
+                super(x, y, 30, 30, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 7, 0.2, 'Air & Ground', 'Ground');
                 this.game = game;
                 this.emoji = '👑';
                 this.fontSize = 35;
@@ -2659,7 +2755,7 @@
         class Musketeer extends Unit {
              constructor(x, y, team, game) {
                 const stats = CARD_DECK.musketeer.stats;
-                super(x, y, 30, 30, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 8, 0.2, 'Air & Ground');
+                super(x, y, 30, 30, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 8, 0.2, 'Air & Ground', 'Ground');
                 this.game = game;
                 this.emoji = '🎯';
                 this.fontSize = 30;
@@ -2670,29 +2766,45 @@
         }
         
         class Valkyrie extends Unit {
-            constructor(x, y, team) {
+            constructor(x, y, team, game) { // Added game
                 const stats = CARD_DECK.valkyrie.stats;
-                super(x, y, 30, 30, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 6, 0.4, 'Ground'); 
+                super(x, y, 30, 30, stats.hp, team, 40, stats.range, stats.damage, stats.attackSpeed, 6, 0.4, 'Ground', 'Ground'); 
                 this.emoji = '🪓';
                 this.fontSize = 30;
+                this.game = game; // NEW
+                this.splashRadius = 2 * 25; // NEW: 2 tile radius (50px)
             }
-            // FIXME: Valkyrie should do splash damage.
+            
+            // NEW attack method for splash
+            attack(target) {
+                // Valkyrie hits everything around HER
+                
+                // Add a visual effect
+                this.game.addEffect(new SpinEffect(this.x, this.y, this.splashRadius));
+    
+                // Find all ground enemies in range (units + towers)
+                const allEntities = [...this.game.entities, ...this.game.getAllTowers()];
+                for (const entity of allEntities) {
+                    // Check if it's an enemy, alive, on the ground, and not herself
+                    if (entity.team !== this.team && entity.isAlive && entity.transport === 'Ground' && entity !== this) {
+                        const distance = getDistance(this, entity);
+                        if (distance <= this.splashRadius) {
+                            entity.takeDamage(this.attackDamage);
+                        }
+                    }
+                }
+            }
         }
         
         class HogRider extends Unit {
             constructor(x, y, team) {
                 const stats = CARD_DECK.hogRider.stats;
-                super(x, y, 35, 35, stats.hp, team, 60, stats.range, stats.damage, stats.attackSpeed, 7, 0.6, 'Buildings');
+                super(x, y, 35, 35, stats.hp, team, 60, stats.range, stats.damage, stats.attackSpeed, 7, 0.6, 'Buildings', 'Ground');
                 this.emoji = '🔨';
                 this.fontSize = 35;
             }
-            findTarget(game) { // Copy from Giant
-                const enemyTowers = game.getTowers(this.team === 'player' ? 'ai' : 'player');
-                if (this.lane === 'left' && enemyTowers.left.isAlive) this.target = enemyTowers.left;
-                else if (this.lane === 'right' && enemyTowers.right.isAlive) this.target = enemyTowers.right;
-                else this.target = enemyTowers.king;
-            }
-            update(deltaTime, game) { // Copy from Giant
+            // findTarget is inherited, logic fixed in base Unit
+            update(deltaTime, game) { // Use base update
                 super.update(deltaTime, game);
             }
         }
@@ -2700,7 +2812,7 @@
         class Skeleton extends Unit {
              constructor(x, y, team) {
                 const stats = CARD_DECK.skeletonArmy.stats; // Use army stats for one skeleton
-                super(x, y, 20, 20, stats.hp, team, 50, stats.range, stats.damage, stats.attackSpeed, 6, 0.3, 'Ground'); 
+                super(x, y, 20, 20, stats.hp, team, 50, stats.range, stats.damage, stats.attackSpeed, 6, 0.3, 'Ground', 'Ground'); 
                 this.emoji = '💀';
                 this.fontSize = 20;
             }
@@ -2709,7 +2821,7 @@
         class Minion extends Unit {
              constructor(x, y, team, game) {
                 const stats = CARD_DECK.minions.stats;
-                super(x, y, 25, 25, stats.hp, team, 50, stats.range, stats.damage, stats.attackSpeed, 7, 0.2, 'Air & Ground'); 
+                super(x, y, 25, 25, stats.hp, team, 50, stats.range, stats.damage, stats.attackSpeed, 7, 0.2, 'Air & Ground', 'Air'); // CHANGED
                 this.game = game;
                 this.emoji = '🦇';
                 this.fontSize = 25;
@@ -2748,7 +2860,9 @@
                 this.y += Math.sin(angle) * this.speed * deltaTime;
             }
             onHit() {
-                this.target.takeDamage(this.damage);
+                if(this.target.isAlive) {
+                    this.target.takeDamage(this.damage);
+                }
                 this.isAlive = false;
             }
             draw(ctx) {
@@ -2773,6 +2887,7 @@
                 this.game.addEffect(new Explosion(this.x, this.y, this.aoeRadius)); 
                 const allEntities = [...this.game.entities, ...this.game.getAllTowers()];
                 for (const entity of allEntities) {
+                    // Fireball hits Air & Ground
                     if (entity.team !== this.team && entity.isAlive) {
                         const distance = getDistance(this, entity);
                         if (distance <= this.aoeRadius) {
@@ -2787,6 +2902,47 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(this.emoji, this.x, this.y);
+            }
+        }
+        
+        // NEW: Wizard's Splash Projectile
+        class SplashProjectile extends Projectile {
+            constructor(x, y, target, damage, team, emoji, size, splashRadius, game) {
+                super(x, y, target, damage, team, emoji, size);
+                this.splashRadius = splashRadius;
+                this.game = game;
+                this.speed = 200; // Slower than an arrow
+            }
+        
+            onHit() {
+                if (!this.target) {
+                     this.isAlive = false;
+                     return;
+                }
+                // Hit location is where the target *was* when hit
+                const hitX = this.target.isAlive ? this.target.x : this.x;
+                const hitY = this.target.isAlive ? this.target.y : this.y;
+        
+                // Damage the primary target
+                if(this.target.isAlive) {
+                    this.target.takeDamage(this.damage);
+                }
+                this.isAlive = false;
+        
+                // Add explosion effect
+                this.game.addEffect(new Explosion(hitX, hitY, this.splashRadius));
+        
+                // Find splash targets (all enemies including towers)
+                // Wizard hits Air & Ground
+                const allEntities = [...this.game.entities, ...this.game.getAllTowers()];
+                for (const entity of allEntities) {
+                    if (entity.team !== this.team && entity.isAlive && entity !== this.target) {
+                        const distance = getDistance({x: hitX, y: hitY}, entity);
+                        if (distance <= this.splashRadius) {
+                            entity.takeDamage(this.damage);
+                        }
+                    }
+                }
             }
         }
 
@@ -2919,6 +3075,7 @@
                 
                 const allEntities = [...this.entities, ...this.getAllTowers()];
                 for (const entity of allEntities) {
+                    // Arrows hit Air & Ground
                     if (entity.team !== team && entity.isAlive) {
                         const distance = getDistance({x: x, y: y}, entity);
                         if (distance <= aoeRadius) {
@@ -2935,6 +3092,7 @@
                 
                 const allEntities = [...this.entities, ...this.getAllTowers()];
                 for (const entity of allEntities) {
+                    // Zap hits Air & Ground
                     if (entity.team !== team && entity.isAlive) {
                         const distance = getDistance({x: x, y: y}, entity);
                         if (distance <= (stats.range * 25)) {
@@ -2980,7 +3138,7 @@
                         this.entities.push(new Musketeer(x, y, team, this));
                         break;
                     case 'valkyrie':
-                        this.entities.push(new Valkyrie(x, y, team));
+                        this.entities.push(new Valkyrie(x, y, team, this)); // CHANGED
                         break;
                     case 'hogRider':
                         this.entities.push(new HogRider(x, y, team));
@@ -3075,7 +3233,7 @@
                     cardEl.innerHTML = `
                         <div class="card-cost">${card.cost}</div>
                         <div class="card-image">${CARD_SVG_GRAPHICS[cardKey] || ''}</div>
-                        <div class="card-name">${card.name}</div>
+                        <div class.card-name">${card.name}</div>
                     `;
                     // REVERTED: back to 'click' and 'selectCard'
                     cardEl.addEventListener('click', () => this.selectCard(index));
@@ -3091,7 +3249,7 @@
                     nextCardPreview.innerHTML = `
                         <div class="card-cost">${card.cost}</div>
                         <div class="next-card-image">${CARD_SVG_GRAPHICS[nextCardKey] || ''}</div>
-                        <div class="card-name">${card.name}</div>
+                        <div class.card-name">${card.name}</div>
                     `;
                 } else {
                     nextCardPreview.innerHTML = ''; 
@@ -3355,7 +3513,6 @@
                 this.isCursorOnCanvas = false;
             }
 
-pro
             // *** RE-ADDED: Full drawPlacementIndicator logic ***
             drawPlacementIndicator(ctx) {
                 // Don't draw if no card is selected or cursor is off-canvas
@@ -3409,6 +3566,15 @@ pro
                     
                     const tileWidth = 40; 
                     const tileHeight = 40;
+                    
+                    // NEW: Show sprite at cursor
+                    if (card.emoji) {
+                        ctx.font = `${CARD_DECK[cardKey].fontSize || 30}px Arial`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(card.emoji, x, y);
+                    }
+                    
                     ctx.strokeRect(x - tileWidth / 2, y - tileHeight / 2, tileWidth, tileHeight);
                     
                     // If hovering a FORBIDDEN spot, show ALL forbidden zones
